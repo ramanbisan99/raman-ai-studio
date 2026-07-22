@@ -25,19 +25,27 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 st.title("🎬 RAMAN AI STUDIO - FINAL PERFECT PRO")
-st.markdown("<p style='text-align: center; color: #888888;'>१००% अचूक नैसर्गिक रंग आणि प्रोफेशनल डॉक्युमेंटरी ऑडिओ</p>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; color: #888888;'>१००% अचूक नैसर्गिक रंग, कोणतेही पात्र आणि नो एरर!</p>", unsafe_allow_html=True)
 st.markdown("---")
 
 # --- UI Setup ---
 col1, col2 = st.columns([1, 2])
 with col1:
     language = st.selectbox("१. स्क्रिप्टची भाषा (Language):", ["Marathi", "Hindi", "English"])
-    # नवीन बदल: निवेदकाचा आवाज निवडण्याचा पर्याय
     narrator_voice = st.selectbox("२. निवेदकाचा आवाज (Narrator Voice):", ["Male (पुरुष)", "Female (स्त्री)"])
 with col2:
-    script_text = st.text_area("३. परफेक्ट स्क्रिप्ट टाका:", height=200, placeholder="उदा. एक कावळा आकाशात उडत होता...")
+    script_text = st.text_area("३. परफेक्ट स्क्रिप्ट टाका:", height=200, placeholder="उदा. एक पोपट आकाशात उंच उडत होता...")
 
-# --- Voice Setup (Updated Logic) ---
+# --- Safe Translation Engine (No 402 Errors) ---
+def translate_to_english(text):
+    try:
+        url = f"https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=en&dt=t&q={urllib.parse.quote(text)}"
+        response = requests.get(url).json()
+        return response[0][0][0]
+    except Exception as e:
+        return text
+
+# --- Voice Setup ---
 def get_voice_model(lang, voice_type):
     if lang == "Marathi":
         return "mr-IN-AarohiNeural" if voice_type == "Female (स्त्री)" else "mr-IN-ManoharNeural"
@@ -55,7 +63,7 @@ if st.button("🚀 Generate Final Perfect Video"):
     if not script_text.strip():
         st.warning("⚠️ कृपया स्क्रिप्ट टाका.")
     else:
-        with st.spinner("AI तुमची स्क्रिप्ट प्रोसेस करत आहे..."):
+        with st.spinner("AI तुमची स्क्रिप्ट प्रोसेस करत आहे आणि अचूक नैसर्गिक रंग ठरवत आहे..."):
             try:
                 sentences = [s.strip() for s in re.split(r'[.?!|।]+', script_text) if len(s.strip()) > 3]
                 
@@ -68,21 +76,22 @@ if st.button("🚀 Generate Final Perfect Video"):
                 for i, sentence in enumerate(sentences):
                     st.text(f"🎬 Scene {i+1} तयार होत आहे: '{sentence[:30]}...'")
                     
-                    # 1. Audio (आता वापरकर्त्याने निवडलेला एकच आवाज संपूर्ण व्हिडिओसाठी राहील)
+                    # 1. Audio
                     voice_model = get_voice_model(language, narrator_voice)
                     audio_path = f"temp_audio_{i}.mp3"
                     asyncio.run(generate_audio(sentence, voice_model, audio_path))
                     audio_clip = AudioFileClip(audio_path)
                     
-                    # 2. Strict Realism Prompt Generation
-                    system_prompt = "You are an expert director. Translate the text to a descriptive English image prompt. RULE: Ensure strict realism. If a subject is mentioned, automatically apply its accurate natural real-world color and anatomy (e.g., crows MUST be pitch black, tigers have natural stripes, humans look natural). No fantasy, no glowing effects, no white crows. End the prompt with: '32K resolution, highly detailed, photorealistic, cinematic, National Geographic style'. Output ONLY the English prompt."
+                    # 2. Universal Translation & Strict Reality Enforcement
+                    translated_text = translate_to_english(sentence)
                     
-                    text_api_url = f"https://text.pollinations.ai/prompt/{urllib.parse.quote(sentence)}?system={urllib.parse.quote(system_prompt)}"
-                    exact_english_prompt = requests.get(text_api_url).text.strip()
-                    st.caption(f"⚙️ Auto-Prompt: {exact_english_prompt}")
+                    # This rule forces the image AI to use ONLY correct natural colors for ANY subject
+                    final_image_prompt = f"{translated_text}. CRITICAL RULE: Ensure strictly natural, real-world anatomy and true natural colors for all subjects (e.g., crows are black, parrots are green, tigers are striped). No fantasy elements. 32K resolution, National Geographic documentary style, highly detailed, photorealistic cinematic shot, completely natural."
+                    
+                    st.caption(f"⚙️ Auto-Prompt: {final_image_prompt}")
                     
                     # 3. Image Generation
-                    image_url = f"https://image.pollinations.ai/prompt/{urllib.parse.quote(exact_english_prompt)}?width=1280&height=720&nologo=true"
+                    image_url = f"https://image.pollinations.ai/prompt/{urllib.parse.quote(final_image_prompt)}?width=1280&height=720&nologo=true"
                     img_data = requests.get(image_url).content
                     image_path = f"temp_frame_{i}.jpg"
                     with open(image_path, "wb") as f:
