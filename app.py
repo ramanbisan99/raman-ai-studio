@@ -58,8 +58,8 @@ if st.button("🚀 Generate 100% Auto Video"):
         with st.spinner("🧠 AI तुमची स्क्रिप्ट वाचून डिरेक्शन करत आहे..."):
             try:
                 genai.configure(api_key=gemini_api_key)
-                # Updated to gemini-2.5-flash / gemini-1.5-pro compatible stable string
-                model = genai.GenerativeModel('gemini-2.5-flash')
+                # Updated to the latest Gemini 3.5 Flash model as per your API settings
+                model = genai.GenerativeModel('gemini-3.5-flash')
                 ai_prompt = f"Analyze this script: '{script_text}'. Extract the main visual subject (max 4 words) and cinematic action (max 8 words) in English. Reply exactly in this format: Subject: [subject], Action: [action]"
                 
                 ai_response = model.generate_content(ai_prompt).text
@@ -83,12 +83,4 @@ if st.button("🚀 Generate 100% Auto Video"):
                 st.audio(audio_path)
                 
             except Exception as e:
-                # Fallback if 2.5 isn't direct, try standard gemini-1.5
-                try:
-                    model = genai.GenerativeModel('gemini-1.5-pro')
-                    ai_prompt = f"Analyze this script: '{script_text}'. Extract the main visual subject (max 4 words) and cinematic action (max 8 words) in English. Reply exactly in this format: Subject: [subject], Action: [action]"
-                    ai_response = model.generate_content(ai_prompt).text
-                    extracted_info = ai_response.replace("\n", "").strip()
-                    st.success(f"🎥 AI Director: {extracted_info}")
-                except Exception as ex:
-                    st.error(f"Error: {e}")
+                st.error(f"Error: {e}")
