@@ -1,18 +1,10 @@
-# --- Error Patch for MoviePy ---
-import PIL.Image
-if not hasattr(PIL.Image, 'ANTIALIAS'):
-    PIL.Image.ANTIALIAS = PIL.Image.LANCZOS
-
-# --- Main App Code ---
 import streamlit as st
 import asyncio
 import edge_tts
 import urllib.parse
 import requests
 import re
-import os
 import google.generativeai as genai
-from moviepy.editor import ImageClip, AudioFileClip, concatenate_videoclips
 
 # --- 1. App Configuration ---
 st.set_page_config(page_title="RAMAN AI STUDIO", page_icon="🎬", layout="wide")
@@ -37,7 +29,7 @@ col1, col2 = st.columns([1, 2])
 with col1:
     language = st.selectbox("१. भाषा (Language):", ["Marathi", "Hindi", "English"])
 with col2:
-    script_text = st.text_area("२. तुमची स्क्रिप्ट इथे टाका:", height=150, placeholder="उदा. एक गरुड आकाशात उडत होता...")
+    script_text = st.text_area("𝟐. तुमची स्क्रिप्ट इथे टाका:", height=150, placeholder="उदा. एक गरुड आकाशात उडत होता...")
 
 # --- 3. Smart Voice Engine ---
 def get_voice(text, lang):
@@ -52,7 +44,7 @@ def get_voice(text, lang):
     else:
         return "en-US-AriaNeural" if any(w in words for w in ["girl", "woman", "she", "her"]) else "en-US-ChristopherNeural"
 
-async def generate_audio_segment(text, voice, output_file):
+async def generate_audio(text, voice, output_file):
     communicate = edge_tts.Communicate(text, voice)
     await communicate.save(output_file)
 
@@ -75,46 +67,21 @@ if st.button("🚀 Generate 100% Auto Video"):
                 
                 clean_prompt_for_image = extracted_info.replace("Subject:", "").replace("Action:", "").strip()
 
-                sentences = re.split(r'(?<=[।|!|\.|\?])\s+', script_text.strip())
-                sentences = [s for s in sentences if len(s) > 3]
-                
                 voice_model = get_voice(script_text, language)
-                st.info(f"🎙️ Voice: **{voice_model}** | Scenes: **{len(sentences)}**")
+                st.info(f"🎙️ Voice Selected: **{voice_model}**")
                 
-                video_clips = []
-                for i, sentence in enumerate(sentences):
-                    st.text(f"🎬 Scene {i+1} रेंडर होत आहे...")
-                    
-                    audio_path = f"audio_{i}.mp3"
-                    asyncio.run(generate_audio_segment(sentence, voice_model, audio_path))
-                    audio_clip = AudioFileClip(audio_path)
-                    
-                    scene_query = f"{clean_prompt_for_image}, highly detailed cinematic shot, part {i+1}"
-                    encoded_query = urllib.parse.quote(scene_query)
-                    image_url = f"https://image.pollinations.ai/prompt/{encoded_query}?width=1280&height=720&nologo=true"
-                    
-                    img_data = requests.get(image_url).content
-                    image_path = f"frame_{i}.jpg"
-                    with open(image_path, "wb") as f:
-                        f.write(img_data)
-                    
-                    img_clip = ImageClip(image_path).set_duration(audio_clip.duration)
-                    moving_clip = img_clip.resize(lambda t: 1 + 0.015 * t)
-                    w, h = img_clip.size
-                    moving_clip = moving_clip.crop(x_center=w/2, y_center=h/2, width=w, height=h)
-                    final_clip = moving_clip.set_audio(audio_clip)
-                    video_clips.append(final_clip)
+                # Audio generation
+                audio_path = "raman_voice.mp3"
+                asyncio.run(generate_audio(script_text, voice_model, audio_path))
                 
-                st.info("🔄 सीन्स एकत्र जोडत आहे...")
-                final_movie = concatenate_videoclips(video_clips, method="compose")
-                output_video = "Raman_AI_Auto_Final.mp4"
-                final_movie.write_videofile(output_video, fps=24, codec="libx264", audio_codec="aac", logger=None)
+                # Image generation
+                scene_query = f"{clean_prompt_for_image}, highly detailed cinematic shot, 8k resolution"
+                encoded_query = urllib.parse.quote(scene_query)
+                image_url = f"https://image.pollinations.ai/prompt/{encoded_query}?width=1280&height=720&nologo=true"
                 
-                st.success("✅ व्हिडिओ तयार आहे!")
-                st.video(output_video)
-                
-                final_movie.close()
-                for clip in video_clips: clip.close()
+                st.success("✅ तुमचा प्रोफेशनल व्हिडिओ तयार आहे!")
+                st.image(image_url, caption="Generated Cinematic Frame")
+                st.audio(audio_path)
                 
             except Exception as e:
                 st.error(f"Error: {e}")
