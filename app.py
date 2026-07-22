@@ -29,7 +29,7 @@ col1, col2 = st.columns([1, 2])
 with col1:
     language = st.selectbox("१. भाषा (Language):", ["Marathi", "Hindi", "English"])
 with col2:
-    script_text = st.text_area("𝟐. तुमची स्क्रिप्ट इथे टाका:", height=150, placeholder="उदा. एक गरुड आकाशात उडत होता...")
+    script_text = st.text_area("२. तुमची स्क्रिप्ट इथे टाका:", height=150, placeholder="उदा. एक गरुड आकाशात उडत होता...")
 
 # --- 3. Smart Voice Engine ---
 def get_voice(text, lang):
@@ -58,7 +58,8 @@ if st.button("🚀 Generate 100% Auto Video"):
         with st.spinner("🧠 AI तुमची स्क्रिप्ट वाचून डिरेक्शन करत आहे..."):
             try:
                 genai.configure(api_key=gemini_api_key)
-                model = genai.GenerativeModel('gemini-1.5-flash')
+                # Updated to gemini-2.5-flash / gemini-1.5-pro compatible stable string
+                model = genai.GenerativeModel('gemini-2.5-flash')
                 ai_prompt = f"Analyze this script: '{script_text}'. Extract the main visual subject (max 4 words) and cinematic action (max 8 words) in English. Reply exactly in this format: Subject: [subject], Action: [action]"
                 
                 ai_response = model.generate_content(ai_prompt).text
@@ -70,11 +71,9 @@ if st.button("🚀 Generate 100% Auto Video"):
                 voice_model = get_voice(script_text, language)
                 st.info(f"🎙️ Voice Selected: **{voice_model}**")
                 
-                # Audio generation
                 audio_path = "raman_voice.mp3"
                 asyncio.run(generate_audio(script_text, voice_model, audio_path))
                 
-                # Image generation
                 scene_query = f"{clean_prompt_for_image}, highly detailed cinematic shot, 8k resolution"
                 encoded_query = urllib.parse.quote(scene_query)
                 image_url = f"https://image.pollinations.ai/prompt/{encoded_query}?width=1280&height=720&nologo=true"
@@ -84,4 +83,12 @@ if st.button("🚀 Generate 100% Auto Video"):
                 st.audio(audio_path)
                 
             except Exception as e:
-                st.error(f"Error: {e}")
+                # Fallback if 2.5 isn't direct, try standard gemini-1.5
+                try:
+                    model = genai.GenerativeModel('gemini-1.5-pro')
+                    ai_prompt = f"Analyze this script: '{script_text}'. Extract the main visual subject (max 4 words) and cinematic action (max 8 words) in English. Reply exactly in this format: Subject: [subject], Action: [action]"
+                    ai_response = model.generate_content(ai_prompt).text
+                    extracted_info = ai_response.replace("\n", "").strip()
+                    st.success(f"🎥 AI Director: {extracted_info}")
+                except Exception as ex:
+                    st.error(f"Error: {e}")
