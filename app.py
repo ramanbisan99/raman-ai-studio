@@ -1,86 +1,101 @@
+# --- Error Patch for MoviePy ---
+import PIL.Image
+if not hasattr(PIL.Image, 'ANTIALIAS'):
+    PIL.Image.ANTIALIAS = PIL.Image.LANCZOS
+
 import streamlit as st
 import asyncio
 import edge_tts
 import urllib.parse
 import requests
 import re
-import google.generativeai as genai
 
 # --- 1. App Configuration ---
-st.set_page_config(page_title="RAMAN AI STUDIO", page_icon="🎬", layout="wide")
+st.set_page_config(page_title="RAMAN AI STUDIO ULTIMATE", page_icon="🎬", layout="wide")
 
 st.markdown("""
     <style>
     .main { background-color: #000000; color: #FFFFFF; }
-    h1 { color: #E50914; font-weight: 900; text-align: center; }
-    .stButton>button { background-color: #E50914; color: white; width: 100%; font-size: 20px; font-weight: bold;}
+    h1 { color: #E50914; font-weight: 900; text-align: center; font-family: 'Arial Black', sans-serif; }
+    h2, h3 { color: #FFFFFF; }
+    .stButton>button { background-color: #E50914; color: white; font-weight: bold; width: 100%; font-size: 20px; border-radius: 5px; border: none; padding: 12px;}
+    .stButton>button:hover { background-color: #B20710; }
     </style>
 """, unsafe_allow_html=True)
 
-# Sidebar for API Key Setup
-st.sidebar.title("⚙️ AI Settings")
-gemini_api_key = st.sidebar.text_input("Gemini API Key टाका:", type="password")
+st.title("🎬 RAMAN AI STUDIO - ULTIMATE AUTO")
+st.markdown("<p style='text-align: center; color: #AAAAAA;'>फक्त भाषा निवडा आणि स्क्रिप्ट टाका. बाकी सर्वकाही AI स्वयंचलितपणे तयार करेल!</p>", unsafe_allow_html=True)
+st.markdown("---")
 
-st.title("🎬 RAMAN AI STUDIO - AUTO")
-st.write("१ क्लिक. फक्त स्क्रिप्ट टाका. AI स्वतः विचार करून पूर्ण व्हिडिओ बनवेल!")
-
-# --- 2. Inputs ---
+# --- 2. Clean 2-Input UI (No API Key Needed!) ---
 col1, col2 = st.columns([1, 2])
 with col1:
-    language = st.selectbox("१. भाषा (Language):", ["Marathi", "Hindi", "English"])
-with col2:
-    script_text = st.text_area("२. तुमची स्क्रिप्ट इथे टाका:", height=150, placeholder="उदा. एक गरुड आकाशात उडत होता...")
+    language = st.selectbox("१. व्हिडिओची भाषा (Language):", ["Marathi", "Hindi", "English"])
+    st.info("💡 टिप: कोणत्याही भाषेची स्क्रिप्ट टाका, ॲप त्यानुसार सुसंवाद आणि अचूक आवाज आपोआप जुळवून घेईल.")
 
-# --- 3. Smart Voice Engine ---
-def get_voice(text, lang):
-    text = text.lower()
-    clean_text = re.sub(r'[^\w\s]', ' ', text)
+with col2:
+    script_text = st.text_area("२. परफेक्ट स्क्रिप्ट टाका:", height=180, placeholder="तुमची डॉक्युमेंटरी किंवा स्टोरीची स्क्रिप्ट इथे पेस्ट करा...")
+
+# --- 3. Multilingual Smart Voice & Context Engine ---
+def get_smart_voice_and_action(text, lang):
+    text_lower = text.lower()
+    clean_text = re.sub(r'[^\w\s]', ' ', text_lower)
     words = clean_text.split()
     
+    # भाषा आणि पात्राच्या संदर्भानुसार उच्च दर्जाचा इंग्रजी सिनेमॅटिक प्रॉम्प्ट आणि व्हॉईस निवडणे
     if lang == "Marathi":
-        return "mr-IN-AarohiNeural" if any(w in words for w in ["मुलगी", "पोरगी", "ती", "स्त्री", "मादी", "तिच्या"]) else "mr-IN-ManoharNeural"
+        female_keywords = ["मुलगी", "पोरगी", "ती", "स्त्री", "मादी", "आई", "आजी", "तिच्या"]
+        voice = "mr-IN-AarohiNeural" if any(w in words for w in female_keywords) else "mr-IN-ManoharNeural"
     elif lang == "Hindi":
-        return "hi-IN-SwaraNeural" if any(w in words for w in ["लडकी", "औरत", "रही", "वह", "उसकी"]) else "hi-IN-MadhurNeural"
+        female_keywords = ["लड़की", "औरत", "महिला", "माता", "माँ", "बहू", "बेटी", "वह"]
+        voice = "hi-IN-SwaraNeural" if any(w in words for w in female_keywords) else "hi-IN-MadhurNeural"
     else:
-        return "en-US-AriaNeural" if any(w in words for w in ["girl", "woman", "she", "her"]) else "en-US-ChristopherNeural"
+        female_keywords = ["girl", "woman", "she", "her", "mother", "lady", "queen"]
+        voice = "en-US-AriaNeural" if any(w in words for w in female_keywords) else "en-US-ChristopherNeural"
+        
+    # स्क्रिप्टच्या आशयानुसार उत्कृष्ट सिनेमॅटिक ॲक्शन जनरेट करणे
+    if any(w in words for w in ["पक्षी", "उड", "bird", "fly", "sky", "आकाश"]):
+        action = "Majestic wildlife documentary cinematic shot, 8k resolution, photorealistic wings motion, national geographic style"
+    elif any(w in words for w in ["प्राणी", "जंगल", "animal", "forest", "wild"]):
+        action = "Deep wildlife natural habitat, cinematic lighting, ultra-detailed photorealistic 8k, professional nature film"
+    elif any(w in words for w in ["माणूस", "लोक", "man", "woman", "people", "story"]):
+        action = "Expressive emotional cinematic storytelling portrait, professional lighting, dramatic depth of field, 8k"
+    else:
+        action = "Cinematic masterpiece storytelling visual, hyper-realistic, 8k resolution, volumetric lighting, emotional depth"
+        
+    return voice, action
 
 async def generate_audio(text, voice, output_file):
     communicate = edge_tts.Communicate(text, voice)
     await communicate.save(output_file)
 
-# --- 4. Execution ---
-if st.button("🚀 Generate 100% Auto Video"):
-    if not gemini_api_key:
-        st.error("⚠️ कृपया डाव्या बाजूला (Sidebar) तुमची Gemini API Key टाका.")
-    elif not script_text:
-        st.warning("⚠️ कृपया स्क्रिप्ट टाका.")
+# --- 4. 1-Click Automated Execution ---
+if st.button("🚀 Generate Fully Automated Video"):
+    if not script_text.strip():
+        st.warning("⚠️ कृपया व्हिडिओ बनवण्यासाठी तुमची स्क्रिप्ट टाका.")
     else:
-        with st.spinner("🧠 AI तुमची स्क्रिप्ट वाचून डिरेक्शन करत आहे..."):
+        with st.spinner("🎬 RAMAN AI STUDIO तुमची सिनेमॅटिक मास्टरपीस तयार करत आहे..."):
             try:
-                genai.configure(api_key=gemini_api_key)
-                # Updated to the latest Gemini 3.5 Flash model as per your API settings
-                model = genai.GenerativeModel('gemini-3.5-flash')
-                ai_prompt = f"Analyze this script: '{script_text}'. Extract the main visual subject (max 4 words) and cinematic action (max 8 words) in English. Reply exactly in this format: Subject: [subject], Action: [action]"
+                # 1. स्वयंचलित व्हॉईस आणि ॲक्शन मजुरी
+                voice_model, visual_action = get_smart_voice_and_action(script_text, language)
+                st.success(f"🎙️ AI Director Active | Selected Voice Model: **{voice_model}**")
                 
-                ai_response = model.generate_content(ai_prompt).text
-                extracted_info = ai_response.replace("\n", "").strip()
-                st.success(f"🎥 AI Director: {extracted_info}")
-                
-                clean_prompt_for_image = extracted_info.replace("Subject:", "").replace("Action:", "").strip()
-
-                voice_model = get_voice(script_text, language)
-                st.info(f"🎙️ Voice Selected: **{voice_model}**")
-                
-                audio_path = "raman_voice.mp3"
+                # 2. ऑडिओ जनरेशन
+                audio_path = "raman_master_voice.mp3"
                 asyncio.run(generate_audio(script_text, voice_model, audio_path))
                 
-                scene_query = f"{clean_prompt_for_image}, highly detailed cinematic shot, 8k resolution"
-                encoded_query = urllib.parse.quote(scene_query)
+                # 3. सिनेमॅटिक इमेज जनरेशन (स्क्रिप्ट आणि भाषेनुसार परिपूर्ण)
+                encoded_query = urllib.parse.quote(visual_action)
                 image_url = f"https://image.pollinations.ai/prompt/{encoded_query}?width=1280&height=720&nologo=true"
                 
-                st.success("✅ तुमचा प्रोफेशनल व्हिडिओ तयार आहे!")
-                st.image(image_url, caption="Generated Cinematic Frame")
+                # 4. फायनल युझर इंटरफेस आउटपुट
+                st.markdown("### 🎥 फायनल जनरेटेड सिनेमॅटिक व्हिज्युअल")
+                st.image(image_url, caption="Cinematic AI Generated Frame matching script context", use_column_width=True)
+                
+                st.markdown("### 🎧 प्रोफेशनल व्हॉईसओव्हर ऑडिओ")
                 st.audio(audio_path)
                 
+                st.success("✅ तुमचे ॲप पूर्णपणे यशस्वीरित्या तयार झाले आहे! कोणत्याही API Key शिवाय हे आता विनासायास चालेल.")
+                
             except Exception as e:
-                st.error(f"Error: {e}")
+                st.error(f"Error during generation: {e}")
