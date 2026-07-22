@@ -13,7 +13,7 @@ import os
 from moviepy.editor import ImageClip, AudioFileClip, concatenate_videoclips
 
 # --- 1. App Configuration ---
-st.set_page_config(page_title="RAMAN AI STUDIO - 32K PRO", page_icon="🎬", layout="wide")
+st.set_page_config(page_title="RAMAN AI STUDIO - THE MASTERPIECE", page_icon="🎬", layout="wide")
 
 st.markdown("""
     <style>
@@ -33,29 +33,20 @@ st.markdown("---")
 col1, col2 = st.columns([1, 2])
 with col1:
     language = st.selectbox("१. स्क्रिप्टची भाषा (Language):", ["Marathi", "Hindi", "English"])
-    st.success("🧠 **Memory Brain Active:** आता AI मागील वाक्याचे पात्र लक्षात ठेवेल आणि 'तीक्ष्ण' सारख्या शब्दांमुळे गोंधळणार नाही!")
+    st.success("🛡️ **Anti-Hallucination Brain Active:** आता AI ला मराठीवरून कन्फ्युजन होणार नाही. ते फक्त अचूक 'इंग्रजी' कमांड बनवून १००% ओरिजिनल गरुड आणि वाघच दाखवेल!")
 with col2:
-    script_text = st.text_area("२. परफेक्ट स्क्रिप्ट टाका:", height=200, placeholder="उदा. एक गरुड आकाशात उडत होता. तिथे एक वाघ पाणी पीत होता.")
-
-# --- 3. Smart Voice Engine ---
-def get_voice_id(voice_type, lang):
-    if lang == "Marathi":
-        return "mr-IN-AarohiNeural" if voice_type == "female" else "mr-IN-ManoharNeural"
-    elif lang == "Hindi":
-        return "hi-IN-SwaraNeural" if voice_type == "female" else "hi-IN-MadhurNeural"
-    else:
-        return "en-US-AriaNeural" if voice_type == "female" else "en-US-ChristopherNeural"
+    script_text = st.text_area("२. परफेक्ट स्क्रिप्ट टाका:", height=200, placeholder="उदा. एक भव्य गरुड आकाशात उंच भरारी घेत होता. तिथे एक पट्टेदार वाघ शांतपणे पाणी पीत होता.")
 
 async def generate_audio_segment(text, voice, output_file):
     communicate = edge_tts.Communicate(text, voice)
     await communicate.save(output_file)
 
-# --- 4. Video Generation Engine ---
+# --- 3. Video Generation Engine ---
 if st.button("🚀 Generate 32K Perfect Action Video"):
     if not script_text.strip():
         st.warning("⚠️ कृपया स्क्रिप्ट टाका.")
     else:
-        with st.spinner("🧠 AI अचूक पात्र ओळखून दृश्ये बनवत आहे..."):
+        with st.spinner("🧠 AI तुमचा डिरेक्टर मोड सेट करत आहे... (कृपया शांत राहा, उत्तम व्हिडिओ बनत आहे)"):
             try:
                 sentences = [s.strip() for s in re.split(r'[.?!|।]+', script_text) if len(s.strip()) > 3]
                 
@@ -65,50 +56,54 @@ if st.button("🚀 Generate 32K Perfect Action Video"):
                 
                 video_clips = []
                 
+                # VISUAL STYLE (100% English)
                 VISUAL_STYLE = "Ultra-high-definition, cinematic masterpiece, 32K resolution, National Geographic documentary style, flawless physical accuracy, photorealistic physics, cinematic lighting, no text, no watermark."
                 
-                # --- MEMORY VARIABLES (हा आहे खरा गेम चेंजर) ---
+                # MEMORY VARIABLES
                 active_subject = "Beautiful Cinematic landscape"
-                active_voice_type = "male"
+                active_voice = "mr-IN-ManoharNeural" if language == "Marathi" else "hi-IN-MadhurNeural"
                 
                 for i, sentence in enumerate(sentences):
                     st.text(f"🎬 Scene {i+1} रेंडर होत आहे: '{sentence[:30]}...'")
+                    s_lower = sentence.lower()
                     
-                    # EXACT Word Matching Logic (फक्त स्वतंत्र शब्द ओळखेल)
-                    clean_sentence = re.sub(r'[^\w\s]', ' ', sentence.lower())
-                    words = set(clean_sentence.split())
-                    
-                    # Subject Detection (मागील पात्राला ओव्हरराईड करेल फक्त जर नवीन पात्र आले तर)
-                    if words.intersection({"गरुड", "गरूड", "eagle"}):
-                        active_subject = "A Majestic Bald Eagle bird in the wild"
-                        active_voice_type = "male"
-                    elif words.intersection({"वाघ", "tiger"}):
+                    # 1. SUBJECT DETECTION (मागील पात्राला लक्षात ठेवेल)
+                    if any(w in s_lower for w in ["गरुड", "गरूड", "eagle"]):
+                        active_subject = "A Majestic Bald Eagle"
+                        active_voice = "mr-IN-ManoharNeural" if language == "Marathi" else "hi-IN-MadhurNeural"
+                    elif any(w in s_lower for w in ["वाघ", "tiger"]):
                         active_subject = "A fierce wild Bengal Tiger"
-                        active_voice_type = "male"
-                    elif words.intersection({"सिंह", "lion"}):
+                    elif any(w in s_lower for w in ["सिंह", "lion"]):
                         active_subject = "A wild African Lion"
-                        active_voice_type = "male"
-                    elif words.intersection({"घुबड", "owl"}):
+                    elif any(w in s_lower for w in ["घुबड", "owl"]):
                         active_subject = "A wild night owl bird"
-                        active_voice_type = "male"
-                    elif words.intersection({"स्त्री", "मुलगी", "आई", "ती", "woman", "girl", "she", "her"}):
+                    elif any(w in s_lower for w in ["स्त्री", "मुलगी", "आई", "ती", "woman", "girl", "she"]):
                         active_subject = "A beautiful Indian woman in traditional attire"
-                        active_voice_type = "female"
-                    elif words.intersection({"माणूस", "मुलगा", "तो", "man", "boy", "he", "राजा"}):
+                        active_voice = "mr-IN-AarohiNeural" if language == "Marathi" else "hi-IN-SwaraNeural"
+                    elif any(w in s_lower for w in ["माणूस", "मुलगा", "तो", "man", "boy", "he"]):
                         active_subject = "A rugged Indian man"
-                        active_voice_type = "male"
-                    elif words.intersection({"म्हातारी", "आजी"}):
-                        active_subject = "An old Indian woman"
-                        active_voice_type = "female"
                     
-                    # 1. Audio Generation
-                    voice_model = get_voice_id(active_voice_type, language)
+                    # 2. ACTION TRANSLATOR (मराठीवरून इंग्रजी ॲक्शन)
+                    action = "cinematic action shot, detailed"
+                    if any(w in s_lower for w in ["उड", "भरारी", "आकाशात", "पंख", "ढग"]):
+                        action = "flying high in the sky with spread wings, dynamic motion"
+                    elif any(w in s_lower for w in ["पाणी", "नदी", "काठी", "पीत"]):
+                        action = "drinking water from a river in a dense forest"
+                    elif any(w in s_lower for w in ["डरकाळी", "ओरड", "भयंकर", "पाहिले"]):
+                        action = "roaring aggressively, fierce expression, looking angry, close-up face"
+                    elif any(w in s_lower for w in ["शांत", "बस", "झाड"]):
+                        action = "sitting calmly on a branch, resting"
+                    elif any(w in s_lower for w in ["चाल", "पळ"]):
+                        action = "walking dynamically, intense cinematic scene"
+
+                    # 3. Audio Generation
                     audio_path = f"temp_audio_{i}.mp3"
-                    asyncio.run(generate_audio_segment(sentence, voice_model, audio_path))
+                    asyncio.run(generate_audio_segment(sentence, active_voice, audio_path))
                     audio_clip = AudioFileClip(audio_path)
                     
-                    # 2. Image Generation (Memory Subject + Action)
-                    final_image_prompt = f"Main Subject: {active_subject}. Action taking place: {sentence}. {VISUAL_STYLE}"
+                    # 4. Image Generation (100% PURE ENGLISH PROMPT)
+                    # आता इमेज जनरेटरला एकही मराठी शब्द दिसणार नाही!
+                    final_image_prompt = f"{active_subject}, {action}. {VISUAL_STYLE}"
                     encoded_query = urllib.parse.quote(final_image_prompt)
                     image_url = f"https://image.pollinations.ai/prompt/{encoded_query}?width=1280&height=720&nologo=true"
                     
@@ -117,7 +112,7 @@ if st.button("🚀 Generate 32K Perfect Action Video"):
                     with open(image_path, "wb") as f:
                         f.write(img_data)
                     
-                    # 3. Motion
+                    # 5. Motion (Cinematic Zoom)
                     img_clip = ImageClip(image_path).set_duration(audio_clip.duration)
                     moving_clip = img_clip.resize(lambda t: 1 + 0.015 * t) 
                     w, h = img_clip.size
