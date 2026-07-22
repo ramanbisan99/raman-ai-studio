@@ -26,30 +26,56 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 st.title("🎬 RAMAN AI STUDIO - 32K ACTION PRO")
-st.markdown("<p style='text-align: center; color: #888888;'>१ क्लिक. डायनॅमिक ॲक्शन, अचूक दृश्ये आणि १००% स्वयंचलित!</p>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; color: #888888;'>परफेक्ट ॲक्शन, अचूक पात्र आणि १००% स्वयंचलित नॅशनल जिओग्राफिक स्टाईल!</p>", unsafe_allow_html=True)
 st.markdown("---")
 
 # --- 2. 100% Automated UI ---
 col1, col2 = st.columns([1, 2])
 with col1:
     language = st.selectbox("१. स्क्रिप्टची भाषा (Language):", ["Marathi", "Hindi", "English"])
-    st.success("🤖 **32K Dynamic Brain Active:** हा मोड प्रत्येक वाक्यातील 'ॲक्शन' आणि 'पात्र' ओळखून अचूक डायनॅमिक दृश्य तयार करेल.")
+    st.success("🤖 **Smart Subject Engine Active:** हा मेंदू आता अचूक प्राणी, पक्षी किंवा माणूस ओळखेल आणि माणसाचे चेहरे मध्येच आणणार नाही!")
 with col2:
-    script_text = st.text_area("२. परफेक्ट स्क्रिप्ट टाका:", height=200, placeholder="तुमची स्क्रिप्ट इथे पेस्ट करा. (उदा. एक गरुड आकाशात वेगाने उडत होते. नंतर ते एका झाडावर शांत बसले.)")
+    script_text = st.text_area("२. परफेक्ट स्क्रिप्ट टाका:", height=200, placeholder="उदा. एक गरुड आकाशात उडत होता. तिथे एक वाघ पाणी पीत होता.")
 
-# --- 3. Dynamic Voice Detection ---
-def get_voice_for_scene(sentence, lang):
+# --- 3. Smart Subject & Voice Engine ---
+def analyze_scene(sentence, lang):
     s_lower = sentence.lower()
-    # स्त्री किंवा मुलीचा संदर्भ असल्यास फिमेल व्हॉईस, अन्यथा मेल व्हॉईस
-    female_words = ["स्त्री", "मुलगी", "आई", "ती", "woman", "girl", "she", "her", "राणी", "म्हातारी", "आजी"]
-    is_female = any(w in s_lower for w in female_words)
-    
-    if lang == "Marathi":
-        return "mr-IN-AarohiNeural" if is_female else "mr-IN-ManoharNeural"
-    elif lang == "Hindi":
-        return "hi-IN-SwaraNeural" if is_female else "hi-IN-MadhurNeural"
-    else:
-        return "en-US-AriaNeural" if is_female else "en-US-ChristopherNeural"
+    subject = "Cinematic scenery, high quality"
+    voice = "mr-IN-ManoharNeural" # Default Marathi Male
+
+    # 1. पक्षी आणि प्राणी ओळखणे (Subject Extraction)
+    if any(w in s_lower for w in ["गरुड", "गरूड", "eagle"]): 
+        subject = "A Majestic Bald Eagle bird"
+    elif any(w in s_lower for w in ["वाघ", "tiger"]): 
+        subject = "A fierce wild Bengal Tiger"
+    elif any(w in s_lower for w in ["सिंह", "lion"]): 
+        subject = "A wild African Lion"
+    elif any(w in s_lower for w in ["घुबड", "owl"]): 
+        subject = "A wild night owl bird"
+    elif any(w in s_lower for w in ["हत्ती", "elephant"]): 
+        subject = "A wild elephant"
+    elif any(w in s_lower for w in ["हरीण", "हरिण", "deer"]): 
+        subject = "A wild beautiful deer"
+        
+    # 2. माणसे ओळखणे
+    elif any(w in s_lower for w in ["स्त्री", "मुलगी", "आई", "ती", "woman", "girl", "she", "her"]): 
+        subject = "A beautiful Indian woman"
+        voice = "mr-IN-AarohiNeural"
+    elif any(w in s_lower for w in ["म्हातारी", "आजी"]): 
+        subject = "An old Indian woman"
+        voice = "mr-IN-AarohiNeural"
+    elif any(w in s_lower for w in ["माणूस", "मुलगा", "तो", "man", "boy", "he"]): 
+        subject = "An Indian man"
+    elif any(w in s_lower for w in ["म्हातारा", "आजोबा"]): 
+        subject = "An old Indian man"
+
+    # Language Voice overrides
+    if lang == "Hindi":
+        voice = "hi-IN-SwaraNeural" if "woman" in subject or "Aarohi" in voice else "hi-IN-MadhurNeural"
+    elif lang == "English":
+        voice = "en-US-AriaNeural" if "woman" in subject or "Aarohi" in voice else "en-US-ChristopherNeural"
+
+    return subject, voice
 
 async def generate_audio_segment(text, voice, output_file):
     communicate = edge_tts.Communicate(text, voice)
@@ -60,9 +86,8 @@ if st.button("🚀 Generate 32K Perfect Action Video"):
     if not script_text.strip():
         st.warning("⚠️ कृपया स्क्रिप्ट टाका.")
     else:
-        with st.spinner("🧠 AI तुमचा '32K Master Prompt' आणि 'ॲक्शन' समजून दृश्ये बनवत आहे..."):
+        with st.spinner("🧠 AI अचूक पात्र ओळखून दृश्ये बनवत आहे..."):
             try:
-                # स्क्रिप्टला अचूक वाक्यांमध्ये तोडणे
                 sentences = [s.strip() for s in re.split(r'[.?!|।]+', script_text) if len(s.strip()) > 3]
                 
                 if not sentences:
@@ -71,22 +96,23 @@ if st.button("🚀 Generate 32K Perfect Action Video"):
                 
                 video_clips = []
                 
-                # RAMAN'S 32K MASTER PROMPT TEMPLATE
-                VISUAL_STYLE = "Create an ultra-high-definition, world-class, cinematic masterpiece video with absolute maximum quality and realism. The video must look like it was shot for a Hollywood documentary or National Geographic feature film. The visuals must be hyper-realistic, true-to-life, with extreme micro-details, zero artificial look, and flawless physical accuracy. Render the video in 32K ultra-resolution, HDR10+, full dynamic range, with perfect clarity in every single frame. Use cinematic lighting with physically accurate global illumination, realistic soft shadows, natural light scattering, deep contrast, and beautiful depth of field. All materials, skin, surfaces, water, metal, vegetation, and air must have photorealistic physics. Everything must be geographically correct to Maharashtra. Aspect Ratio: 16:9."
-                CHAR_INSTRUCTION = "According to script context needed create a 100% accurate likeness of this person, human, animals, birds, insects, plants, objects, trees, snakes, fruits, or even abstract elements. The facial features, identity, body, and outfit must remain identical throughout. Hand movements and physical acting must completely match the action of the script. Strictly NO face morphing, age change, or identity drift. Any secondary elements dictated by the script must flawlessly match the script's visual context."
+                # Raman's Optimized 32K Cinematic Style
+                VISUAL_STYLE = "Ultra-high-definition, cinematic masterpiece, 32K resolution, National Geographic documentary style, flawless physical accuracy, photorealistic physics, cinematic lighting, no text, no watermark."
                 
                 for i, sentence in enumerate(sentences):
                     st.text(f"🎬 Scene {i+1} रेंडर होत आहे: '{sentence[:30]}...'")
                     
-                    # 1. ऑडिओ (वाक्यानुसार आवाज सेट करणे)
-                    voice_model = get_voice_for_scene(sentence, language)
+                    # अचूक पात्र आणि आवाज मिळवणे
+                    scene_subject, voice_model = analyze_scene(sentence, language)
+                    
+                    # 1. ऑडिओ
                     audio_path = f"temp_audio_{i}.mp3"
                     asyncio.run(generate_audio_segment(sentence, voice_model, audio_path))
                     audio_clip = AudioFileClip(audio_path)
                     
-                    # 2. ॲक्शन इमेज (Dynamic Action Prompting with 32K Master Prompt)
-                    scene_action = f"Detailed English Scene Description and Flawless Physical Acting/Gestures taking place right now: '{sentence}'. Capture this exact action perfectly in motion without text."
-                    final_image_prompt = f"{VISUAL_STYLE} {CHAR_INSTRUCTION} {scene_action}"
+                    # 2. ॲक्शन इमेज (Subject + Action + Style)
+                    # आता AI ला सर्वात आधी कळेल की विषय माणूस नसून गरुड किंवा वाघ आहे!
+                    final_image_prompt = f"Main Subject: {scene_subject}. Action taking place: {sentence}. {VISUAL_STYLE}"
                     
                     encoded_query = urllib.parse.quote(final_image_prompt)
                     image_url = f"https://image.pollinations.ai/prompt/{encoded_query}?width=1280&height=720&nologo=true"
@@ -96,7 +122,7 @@ if st.button("🚀 Generate 32K Perfect Action Video"):
                     with open(image_path, "wb") as f:
                         f.write(img_data)
                     
-                    # 3. सिनेमॅटिक मोशन (Ken Burns Zoom)
+                    # 3. सिनेमॅटिक मोशन
                     img_clip = ImageClip(image_path).set_duration(audio_clip.duration)
                     moving_clip = img_clip.resize(lambda t: 1 + 0.015 * t) 
                     w, h = img_clip.size
@@ -108,10 +134,10 @@ if st.button("🚀 Generate 32K Perfect Action Video"):
                 st.info("🔄 सर्व सीन्सची व्यावसायिक जोडणी सुरू आहे...")
                 final_movie = concatenate_videoclips(video_clips, method="compose")
                 
-                output_video = "Raman_Ultimate_32K_Action.mp4"
+                output_video = "Raman_Perfect_Action_Final.mp4"
                 final_movie.write_videofile(output_video, fps=24, codec="libx264", audio_codec="aac", logger=None)
                 
-                st.success("✅ तुमचा डायनॅमिक ॲक्शन, परफेक्ट इमोशन्स आणि 32K दर्जाचा व्हिडिओ तयार आहे!")
+                st.success("✅ तुमचा डायनॅमिक ॲक्शन असलेला व्हिडिओ तयार आहे!")
                 st.video(output_video)
                 
                 # मेमरी क्लिनअप
