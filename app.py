@@ -11,7 +11,7 @@ import re
 from moviepy.editor import ImageClip, AudioFileClip, concatenate_videoclips
 
 # --- App Configuration ---
-st.set_page_config(page_title="RAMAN AI STUDIO - 100% AUTO PROFESSIONAL", page_icon="🎬", layout="wide")
+st.set_page_config(page_title="RAMAN AI STUDIO - THE CONTENT LAB PRO", page_icon="🎬", layout="wide")
 
 st.markdown("""
     <style>
@@ -23,8 +23,8 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.title("🎬 RAMAN AI STUDIO - 100% AUTO PROFESSIONAL")
-st.markdown("<p style='text-align: center; color: #888888;'>Metaphor Scrubber: 100% ऑटोमॅटिक विषय ओळखणारा आणि मानवी चुका टाळणारा AI!</p>", unsafe_allow_html=True)
+st.title("🎬 RAMAN AI STUDIO - PROFESSIONAL MASTER")
+st.markdown("<p style='text-align: center; color: #888888;'>Hardcoded Python Scanner: 100% ऑटोमॅटिक विषय ओळख आणि अचूक दृश्य!</p>", unsafe_allow_html=True)
 st.markdown("---")
 
 # --- UI Setup ---
@@ -33,33 +33,39 @@ with col1:
     language = st.selectbox("१. स्क्रिप्टची भाषा:", ["Marathi", "Hindi", "English"])
     narrator_voice = st.selectbox("२. निवेदकाचा आवाज:", ["Male (पुरुष)", "Female (स्त्री)"])
 with col2:
-    script_text = st.text_area("३. संपूर्ण स्क्रिप्ट टाका (उदा. गरुडाला पक्ष्यांचा राजा मानले जाते...):", height=250)
+    script_text = st.text_area("३. संपूर्ण स्क्रिप्ट टाका:", height=250, placeholder="उदा. गरुडाला पक्ष्यांचा राजा मानले जाते...")
 
-# --- 100% AUTOMATIC SUPER BRAIN (THE METAPHOR SCRUBBER) ---
-def auto_perfect_prompt(full_script, current_sentence):
+# --- Direct Translation Engine ---
+def translate_to_english(text):
     try:
-        system_instruction = f"""You are an elite cinematic AI prompt engineer for wildlife and human documentaries.
-        Read the ENTIRE STORY for context: "{full_script}".
-        Now, rewrite ONLY this sentence into a flawless image generation prompt: "{current_sentence}".
-        
-        CRITICAL AND MANDATORY RULES:
-        1. METAPHOR SCRUBBING: If the story is about a bird/animal, and the text uses words like "King", "Queen", "Ruler", "He", "She", YOU MUST REMOVE THEM. Replace "King of birds" with "Apex predator bird". NEVER use the word "King" for an animal.
-        2. ANIMAL/NATURE CONTEXT: If the subject is wildlife (e.g., Eagle), append EXACTLY: "ONLY the animal in its natural habitat. ABSOLUTELY NO HUMANS, NO HUMAN KINGS, NO CLOTHING, NO CROWNS."
-        3. HUMAN CONTEXT: If the story is actually about humans, append: "Authentic rural dark-haired Indian person with brown skin."
-        4. CAMERA & QUALITY: Append to ALL prompts: "Extreme wide angle shot, taken from a far distance, FULL BODY completely visible, real-world physics, perfect anatomical geometry, 32K resolution, National Geographic photography style."
-        
-        Output ONLY the final locked English prompt. Do not add any conversational text.
-        """
-        
-        url = f"https://text.pollinations.ai/{urllib.parse.quote(system_instruction)}"
-        response = requests.get(url)
-        
-        if response.status_code == 200 and "error" not in response.text.lower():
-            return response.text.strip()
-        else:
-            return current_sentence
+        url = f"https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=en&dt=t&q={urllib.parse.quote(text)}"
+        response = requests.get(url).json()
+        return response[0][0][0]
     except Exception as e:
-        return current_sentence
+        return text
+
+# --- 100% DETERMINISTIC PYTHON BRAIN ---
+def generate_perfect_prompt(full_script, current_sentence):
+    # 1. Translate both to English
+    full_eng = translate_to_english(full_script).lower()
+    sent_eng = translate_to_english(current_sentence).lower()
+    
+    # 2. Detect Context (Wildlife vs Human)
+    wildlife_keywords = ['eagle', 'bird', 'animal', 'tiger', 'lion', 'wild', 'forest', 'vulture', 'nature']
+    is_wildlife = any(word in full_eng for word in wildlife_keywords)
+    
+    if is_wildlife:
+        # HARD SCRUB: Remove human/metaphor words completely from the sentence
+        bad_words_pattern = re.compile(r'\b(king|queen|ruler|he|she|his|her|man|person|human)\b', re.IGNORECASE)
+        safe_sentence = bad_words_pattern.sub('the majestic bird', sent_eng)
+        
+        # 100% Strict Animal Prompt
+        final_prompt = f"Action: {safe_sentence}. STRICT RULES: ONLY show the animal/bird in its natural habitat. ABSOLUTELY NO HUMANS, NO KINGS, NO PEOPLE, NO CLOTHING. Extreme wide shot, taken from a far distance, FULL BODY visible, flawless real-world physics, exact anatomical geometry, 32K resolution, National Geographic documentary masterpiece."
+    else:
+        # Human Prompt
+        final_prompt = f"Action: {sent_eng}. STRICT RULES: Authentic rural dark-haired Indian person with brown skin. Extreme wide angle shot, taken from a far distance, FULL BODY completely visible. Flawless real-world physics, perfect anatomical geometry, 32K resolution, highly detailed cinematic style."
+        
+    return final_prompt
 
 # --- Voice Setup ---
 def get_voice_model(lang, voice_type):
@@ -75,11 +81,11 @@ async def generate_audio(text, voice, output_file):
     await communicate.save(output_file)
 
 # --- Video Generation Engine ---
-if st.button("🚀 Generate 100% Auto Perfect Video"):
+if st.button("🚀 Generate 100% Perfect Video"):
     if not script_text.strip():
         st.warning("⚠️ कृपया स्क्रिप्ट टाका.")
     else:
-        with st.spinner("AI चा ऑटोमॅटिक मेंदू स्क्रिप्टमधील उपमा (Metaphors) काढून 100% अचूक दृश्य बनवत आहे..."):
+        with st.spinner("Python Engine शब्दांना स्कॅन करून 100% अचूक प्रॉम्ट बनवत आहे..."):
             try:
                 sentences = [s.strip() for s in re.split(r'[.?!|।]+', script_text) if len(s.strip()) > 5]
                 
@@ -98,9 +104,9 @@ if st.button("🚀 Generate 100% Auto Perfect Video"):
                     asyncio.run(generate_audio(sentence, voice_model, audio_path))
                     audio_clip = AudioFileClip(audio_path)
                     
-                    # 100% Auto Brain Logic with Metaphor Scrubbing
-                    perfect_prompt = auto_perfect_prompt(full_script_context, sentence)
-                    st.caption(f"🧠 Auto-Brain Prompt: {perfect_prompt}")
+                    # Deterministic Prompt Generation
+                    perfect_prompt = generate_perfect_prompt(full_script_context, sentence)
+                    st.caption(f"⚙️ Locked Python Prompt: {perfect_prompt}")
                     
                     image_url = f"https://image.pollinations.ai/prompt/{urllib.parse.quote(perfect_prompt)}?width=1280&height=720&nologo=true"
                     img_data = requests.get(image_url).content
@@ -108,7 +114,6 @@ if st.button("🚀 Generate 100% Auto Perfect Video"):
                     with open(image_path, "wb") as f:
                         f.write(img_data)
                     
-                    # Smooth professional zoom
                     img_clip = ImageClip(image_path).set_duration(audio_clip.duration)
                     moving_clip = img_clip.resize(lambda t: 1 + 0.010 * t) 
                     w, h = img_clip.size
@@ -119,10 +124,10 @@ if st.button("🚀 Generate 100% Auto Perfect Video"):
                 
                 st.info("🔄 व्हिडिओची व्यावसायिक जोडणी सुरू आहे...")
                 final_movie = concatenate_videoclips(video_clips, method="compose")
-                output_video = "Raman_100_Auto_Professional.mp4"
+                output_video = "Raman_The_Content_Lab_Final.mp4"
                 final_movie.write_videofile(output_video, fps=24, codec="libx264", audio_codec="aac", logger=None)
                 
-                st.success("✅ तुमचा १००% ऑटोमॅटिक आणि अचूक व्हिडिओ तयार आहे!")
+                st.success("✅ तुमचा १००% अचूक व्हिडिओ तयार आहे!")
                 st.video(output_video)
                 
                 final_movie.close()
