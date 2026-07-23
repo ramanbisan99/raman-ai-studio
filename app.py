@@ -11,7 +11,7 @@ import re
 from moviepy.editor import ImageClip, AudioFileClip, concatenate_videoclips
 
 # --- App Configuration ---
-st.set_page_config(page_title="RAMAN AI STUDIO - THE CONTENT LAB PRO", page_icon="🎬", layout="wide")
+st.set_page_config(page_title="RAMAN AI STUDIO - DRAFT BUILDER", page_icon="🎬", layout="wide")
 
 st.markdown("""
     <style>
@@ -23,8 +23,8 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.title("🎬 RAMAN AI STUDIO - PROFESSIONAL MASTER")
-st.markdown("<p style='text-align: center; color: #888888;'>Hardcoded Python Scanner: 100% ऑटोमॅटिक विषय ओळख आणि अचूक दृश्य!</p>", unsafe_allow_html=True)
+st.title("🎬 RAMAN AI STUDIO - DRAFT BUILDER")
+st.markdown("<p style='text-align: center; color: #888888;'>Hardcoded Python Scanner: 100% ऑटोमॅटिक विषय ओळख (Drafting Tool)</p>", unsafe_allow_html=True)
 st.markdown("---")
 
 # --- UI Setup ---
@@ -33,7 +33,7 @@ with col1:
     language = st.selectbox("१. स्क्रिप्टची भाषा:", ["Marathi", "Hindi", "English"])
     narrator_voice = st.selectbox("२. निवेदकाचा आवाज:", ["Male (पुरुष)", "Female (स्त्री)"])
 with col2:
-    script_text = st.text_area("३. संपूर्ण स्क्रिप्ट टाका:", height=250, placeholder="उदा. गरुडाला पक्ष्यांचा राजा मानले जाते...")
+    script_text = st.text_area("३. संपूर्ण स्क्रिप्ट टाका:", height=250, placeholder="उदा. एक गरुड आकाशात उंच उडत आहे...")
 
 # --- Direct Translation Engine ---
 def translate_to_english(text):
@@ -44,25 +44,21 @@ def translate_to_english(text):
     except Exception as e:
         return text
 
-# --- 100% DETERMINISTIC PYTHON BRAIN ---
+# --- 100% DETERMINISTIC PYTHON BRAIN (WITH ANATOMY FIX) ---
 def generate_perfect_prompt(full_script, current_sentence):
-    # 1. Translate both to English
     full_eng = translate_to_english(full_script).lower()
     sent_eng = translate_to_english(current_sentence).lower()
     
-    # 2. Detect Context (Wildlife vs Human)
     wildlife_keywords = ['eagle', 'bird', 'animal', 'tiger', 'lion', 'wild', 'forest', 'vulture', 'nature']
     is_wildlife = any(word in full_eng for word in wildlife_keywords)
     
     if is_wildlife:
-        # HARD SCRUB: Remove human/metaphor words completely from the sentence
         bad_words_pattern = re.compile(r'\b(king|queen|ruler|he|she|his|her|man|person|human)\b', re.IGNORECASE)
         safe_sentence = bad_words_pattern.sub('the majestic bird', sent_eng)
         
-        # 100% Strict Animal Prompt
-        final_prompt = f"Action: {safe_sentence}. STRICT RULES: ONLY show the animal/bird in its natural habitat. ABSOLUTELY NO HUMANS, NO KINGS, NO PEOPLE, NO CLOTHING. Extreme wide shot, taken from a far distance, FULL BODY visible, flawless real-world physics, exact anatomical geometry, 32K resolution, National Geographic documentary masterpiece."
+        # Added Anatomically correct & Award-winning wildlife photography keywords
+        final_prompt = f"Action: {safe_sentence}. STRICT RULES: ONLY show the animal/bird in its natural habitat. ABSOLUTELY NO HUMANS, NO PEOPLE. 100% ANATOMICALLY CORRECT, perfect feather structure, normal legs. Extreme wide shot, taken from a far distance, FULL BODY visible, 32K resolution, award-winning National Geographic wildlife photography."
     else:
-        # Human Prompt
         final_prompt = f"Action: {sent_eng}. STRICT RULES: Authentic rural dark-haired Indian person with brown skin. Extreme wide angle shot, taken from a far distance, FULL BODY completely visible. Flawless real-world physics, perfect anatomical geometry, 32K resolution, highly detailed cinematic style."
         
     return final_prompt
@@ -81,11 +77,11 @@ async def generate_audio(text, voice, output_file):
     await communicate.save(output_file)
 
 # --- Video Generation Engine ---
-if st.button("🚀 Generate 100% Perfect Video"):
+if st.button("🚀 Generate Perfect Draft Video"):
     if not script_text.strip():
         st.warning("⚠️ कृपया स्क्रिप्ट टाका.")
     else:
-        with st.spinner("Python Engine शब्दांना स्कॅन करून 100% अचूक प्रॉम्ट बनवत आहे..."):
+        with st.spinner("AI 100% अचूक प्रॉम्ट बनवत आहे..."):
             try:
                 sentences = [s.strip() for s in re.split(r'[.?!|।]+', script_text) if len(s.strip()) > 5]
                 
@@ -104,7 +100,6 @@ if st.button("🚀 Generate 100% Perfect Video"):
                     asyncio.run(generate_audio(sentence, voice_model, audio_path))
                     audio_clip = AudioFileClip(audio_path)
                     
-                    # Deterministic Prompt Generation
                     perfect_prompt = generate_perfect_prompt(full_script_context, sentence)
                     st.caption(f"⚙️ Locked Python Prompt: {perfect_prompt}")
                     
@@ -122,12 +117,12 @@ if st.button("🚀 Generate 100% Perfect Video"):
                     final_scene = moving_clip.set_audio(audio_clip)
                     video_clips.append(final_scene)
                 
-                st.info("🔄 व्हिडिओची व्यावसायिक जोडणी सुरू आहे...")
+                st.info("🔄 व्हिडिओची जोडणी सुरू आहे...")
                 final_movie = concatenate_videoclips(video_clips, method="compose")
-                output_video = "Raman_The_Content_Lab_Final.mp4"
+                output_video = "Raman_Draft_Video.mp4"
                 final_movie.write_videofile(output_video, fps=24, codec="libx264", audio_codec="aac", logger=None)
                 
-                st.success("✅ तुमचा १००% अचूक व्हिडिओ तयार आहे!")
+                st.success("✅ तुमचा ड्राफ्ट व्हिडिओ तयार आहे!")
                 st.video(output_video)
                 
                 final_movie.close()
