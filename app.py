@@ -24,7 +24,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 st.title("🎬 RAMAN AI STUDIO - DOCUMENTARY MASTER")
-st.markdown("<p style='text-align: center; color: #888888;'>उपमा (Metaphors) गाळून फक्त 100% नैसर्गिक दृश्ये देणारा मेंदू</p>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; color: #888888;'>कोणताही 402 एरर नाही, फक्त 100% नैसर्गिक दृश्ये!</p>", unsafe_allow_html=True)
 st.markdown("---")
 
 # --- UI Setup ---
@@ -33,7 +33,16 @@ with col1:
     language = st.selectbox("१. स्क्रिप्टची भाषा:", ["Marathi", "Hindi", "English"])
     narrator_voice = st.selectbox("२. निवेदकाचा आवाज:", ["Male (पुरुष)", "Female (स्त्री)"])
 with col2:
-    script_text = st.text_area("३. स्क्रिप्ट टाका:", height=200, placeholder="उदा. तो सापासारखा फुत्कारतो...")
+    script_text = st.text_area("३. स्क्रिप्ट टाका:", height=200, placeholder="उदा. गरुड विमानासारखा उडतो...")
+
+# --- 100% FREE & SAFE Translation Engine (No 402 Errors) ---
+def translate_to_english(text):
+    try:
+        url = f"https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=en&dt=t&q={urllib.parse.quote(text)}"
+        response = requests.get(url).json()
+        return response[0][0][0]
+    except Exception as e:
+        return text
 
 # --- Voice Setup ---
 def get_voice_model(lang, voice_type):
@@ -53,7 +62,7 @@ if st.button("🚀 Generate Perfect Documentary"):
     if not script_text.strip():
         st.warning("⚠️ कृपया स्क्रिप्ट टाका.")
     else:
-        with st.spinner("AI तुमची स्क्रिप्ट प्रोसेस करत आहे (Metaphors काढून टाकत आहे)..."):
+        with st.spinner("AI तुमची स्क्रिप्ट प्रोसेस करत आहे..."):
             try:
                 sentences = [s.strip() for s in re.split(r'[.?!|।]+', script_text) if len(s.strip()) > 3]
                 
@@ -72,19 +81,11 @@ if st.button("🚀 Generate Perfect Documentary"):
                     asyncio.run(generate_audio(sentence, voice_model, audio_path))
                     audio_clip = AudioFileClip(audio_path)
                     
-                    # 2. Smart Visual Translator (The Metaphor Filter)
-                    # हा प्रॉम्ट AI ला सांगतो की फक्त दृश्य दाखव, उपमा नकोत!
-                    system_prompt = """You are a master wildlife documentary storyboard artist. 
-                    Translate the user's text into an English image prompt. 
-                    CRITICAL RULES: 
-                    1. Remove ALL metaphors and similes (e.g., if it says 'hisses like a snake', DO NOT mention a snake. Just describe the main animal opening its beak or acting aggressively). 
-                    2. Never create monsters, hybrids, or human-animal mixtures. 
-                    3. Focus ONLY on literal, highly realistic visual details of the main subject. 
-                    4. Add: '32K resolution, National Geographic wildlife photography, highly detailed, photorealistic, natural lighting'.
-                    Output ONLY the generated English prompt."""
+                    # 2. Smart Visual Translator (Direct Method without paid API)
+                    translated_text = translate_to_english(sentence)
                     
-                    text_api_url = f"https://text.pollinations.ai/prompt/{urllib.parse.quote(sentence)}?system={urllib.parse.quote(system_prompt)}"
-                    final_image_prompt = requests.get(text_api_url).text.strip()
+                    # हा प्रॉम्ट थेट इमेज AI ला सांगेल की उपमा (Metaphors) गाळून टाक
+                    final_image_prompt = f"{translated_text}. CRITICAL INSTRUCTION: Ignore all metaphors and similes (e.g., if it says 'like an airplane' or 'like a snake', DO NOT show any airplane or snake). Show ONLY the literal main natural subject. Highly realistic, true to life anatomy, zero hybrids, 32K resolution, National Geographic wildlife photography, natural lighting."
                     
                     st.caption(f"⚙️ Auto-Prompt: {final_image_prompt}")
                     
