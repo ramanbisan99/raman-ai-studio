@@ -11,7 +11,7 @@ import re
 from moviepy.editor import ImageClip, AudioFileClip, concatenate_videoclips
 
 # --- App Configuration ---
-st.set_page_config(page_title="RAMAN AI STUDIO - SMART REALITY", page_icon="🎬", layout="wide")
+st.set_page_config(page_title="RAMAN AI STUDIO - FULL BODY ACTION", page_icon="🎬", layout="wide")
 
 st.markdown("""
     <style>
@@ -23,8 +23,8 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.title("🎬 RAMAN AI STUDIO - SMART REALITY")
-st.markdown("<p style='text-align: center; color: #888888;'>प्राणी असेल तर प्राणी, माणूस असेल तर माणूस - 100% अचूकता!</p>", unsafe_allow_html=True)
+st.title("🎬 RAMAN AI STUDIO - FULL BODY ACTION")
+st.markdown("<p style='text-align: center; color: #888888;'>कोणतेही क्लोज-अप नाहीत! फक्त लांबून घेतलेले Full Body आणि Action शॉट्स.</p>", unsafe_allow_html=True)
 st.markdown("---")
 
 # --- UI Setup ---
@@ -33,14 +33,18 @@ with col1:
     language = st.selectbox("१. स्क्रिप्टची भाषा:", ["Marathi", "Hindi", "English"])
     narrator_voice = st.selectbox("२. निवेदकाचा आवाज:", ["Male (पुरुष)", "Female (स्त्री)"])
 with col2:
-    script_text = st.text_area("३. स्क्रिप्ट टाका (कृपया मराठी लिपीत किंवा इंग्रजीत लिहा):", height=200, placeholder="उदा. एक गरुड आकाशात उंच उडत आहे...")
+    script_text = st.text_area("३. स्क्रिप्ट टाका:", height=200, placeholder="उदा. काळे गिधाड झाडावर बसले आहे...")
 
-# --- Safe Translation Engine ---
-def translate_to_english(text):
+# --- Safe Translation Engine (Removes Metaphors) ---
+def smart_translate(text):
     try:
         url = f"https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=en&dt=t&q={urllib.parse.quote(text)}"
         response = requests.get(url).json()
-        return response[0][0][0]
+        translated = response[0][0][0]
+        
+        # सापासारखा (Snake-like) सारखे शब्द काढून टाकणे जेणेकरून चुका होणार नाहीत.
+        translated = translated.replace("snake-like", "").replace("like a snake", "")
+        return translated
     except Exception as e:
         return text
 
@@ -58,11 +62,11 @@ async def generate_audio(text, voice, output_file):
     await communicate.save(output_file)
 
 # --- Video Generation Engine ---
-if st.button("🚀 Generate Perfect Video"):
+if st.button("🚀 Generate Perfect Full Body Video"):
     if not script_text.strip():
         st.warning("⚠️ कृपया स्क्रिप्ट टाका.")
     else:
-        with st.spinner("AI तुमची स्क्रिप्ट अचूकपणे प्रोसेस करत आहे..."):
+        with st.spinner("AI लांबून (Long Shot) कॅमेरा सेट करत आहे आणि दृश्य बनवत आहे..."):
             try:
                 sentences = [s.strip() for s in re.split(r'[.?!|।]+', script_text) if len(s.strip()) > 3]
                 
@@ -82,11 +86,11 @@ if st.button("🚀 Generate Perfect Video"):
                     audio_clip = AudioFileClip(audio_path)
                     
                     # 2. Translation
-                    translated_text = translate_to_english(sentence)
+                    translated_text = smart_translate(sentence)
                     
-                    # 3. SMART CONTEXT PROMPT
-                    # हा प्रॉम्ट आता फक्त तेच बनवेल जे स्क्रिप्टमध्ये आहे. प्राणी असेल तर प्राणीच!
-                    final_image_prompt = f"Subject: {translated_text}. CRITICAL INSTRUCTION: Generate EXACTLY what is described. If the subject is an animal or bird (like an eagle, tiger, crow), show ONLY the animal in its natural habitat with 100% accurate true-to-life anatomy, and absolutely NO humans. If the subject is a human, show realistic humans. Cinematic wide angle, perfect real-world physics, photorealistic, 32k resolution, National Geographic style."
+                    # 3. STRICT CAMERA & FULL BODY PROMPT
+                    # या प्रॉम्टमुळे AI चेहऱ्याजवळ कॅमेरा नेऊ शकणार नाही.
+                    final_image_prompt = f"Subject and Action: {translated_text}. MANDATORY CAMERA RULES: Extreme wide shot, long shot taken from a distance. FULL BODY COMPLETELY VISIBLE from head to toe/tail. Show the entire subject in its surrounding environment. ABSOLUTELY NO CLOSE-UPS, NO PORTRAITS, NO MACRO SHOTS. 100% accurate true-to-life anatomy, natural habitat, real-world physics, photorealistic, 32k resolution, National Geographic documentary style."
                     
                     st.caption(f"⚙️ Auto-Prompt: {final_image_prompt}")
                     
@@ -97,7 +101,7 @@ if st.button("🚀 Generate Perfect Video"):
                     with open(image_path, "wb") as f:
                         f.write(img_data)
                     
-                    # 5. Motion
+                    # 5. Motion (Subtle zoom)
                     img_clip = ImageClip(image_path).set_duration(audio_clip.duration)
                     moving_clip = img_clip.resize(lambda t: 1 + 0.012 * t) 
                     w, h = img_clip.size
@@ -109,7 +113,7 @@ if st.button("🚀 Generate Perfect Video"):
                 # 6. Final Assembly
                 st.info("🔄 व्हिडिओ जोडणी सुरू आहे...")
                 final_movie = concatenate_videoclips(video_clips, method="compose")
-                output_video = "Raman_Smart_Reality.mp4"
+                output_video = "Raman_Full_Body_Reality.mp4"
                 final_movie.write_videofile(output_video, fps=24, codec="libx264", audio_codec="aac", logger=None)
                 
                 st.success("✅ तुमचा व्हिडिओ तयार आहे!")
