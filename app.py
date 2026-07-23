@@ -11,7 +11,7 @@ import re
 from moviepy.editor import ImageClip, AudioFileClip, concatenate_videoclips
 
 # --- App Configuration ---
-st.set_page_config(page_title="RAMAN AI STUDIO - DOCUMENTARY MASTER", page_icon="🎬", layout="wide")
+st.set_page_config(page_title="RAMAN AI STUDIO - 32K ULTRA REALITY", page_icon="🎬", layout="wide")
 
 st.markdown("""
     <style>
@@ -23,8 +23,8 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.title("🎬 RAMAN AI STUDIO - DOCUMENTARY MASTER")
-st.markdown("<p style='text-align: center; color: #888888;'>कोणताही 402 एरर नाही, फक्त 100% नैसर्गिक दृश्ये!</p>", unsafe_allow_html=True)
+st.title("🎬 RAMAN AI STUDIO - 32K ULTRA REALITY")
+st.markdown("<p style='text-align: center; color: #888888;'>सर्वोच्च गुणवत्ता: हुबेहूब डोळे, नाक, त्वचा आणि 100% वास्तव!</p>", unsafe_allow_html=True)
 st.markdown("---")
 
 # --- UI Setup ---
@@ -33,9 +33,9 @@ with col1:
     language = st.selectbox("१. स्क्रिप्टची भाषा:", ["Marathi", "Hindi", "English"])
     narrator_voice = st.selectbox("२. निवेदकाचा आवाज:", ["Male (पुरुष)", "Female (स्त्री)"])
 with col2:
-    script_text = st.text_area("३. स्क्रिप्ट टाका:", height=200, placeholder="उदा. गरुड विमानासारखा उडतो...")
+    script_text = st.text_area("३. स्क्रिप्ट टाका:", height=200, placeholder="उदा. एक माणूस जंगलात उभा आहे...")
 
-# --- 100% FREE & SAFE Translation Engine (No 402 Errors) ---
+# --- 100% FREE Translation Engine ---
 def translate_to_english(text):
     try:
         url = f"https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=en&dt=t&q={urllib.parse.quote(text)}"
@@ -58,11 +58,11 @@ async def generate_audio(text, voice, output_file):
     await communicate.save(output_file)
 
 # --- Video Generation Engine ---
-if st.button("🚀 Generate Perfect Documentary"):
+if st.button("🚀 Generate 32K Realistic Video"):
     if not script_text.strip():
         st.warning("⚠️ कृपया स्क्रिप्ट टाका.")
     else:
-        with st.spinner("AI तुमची स्क्रिप्ट प्रोसेस करत आहे..."):
+        with st.spinner("AI सर्वोच्च क्वालिटी आणि चेहऱ्याची अचूकता (Facial Accuracy) प्रोसेस करत आहे..."):
             try:
                 sentences = [s.strip() for s in re.split(r'[.?!|।]+', script_text) if len(s.strip()) > 3]
                 
@@ -81,22 +81,22 @@ if st.button("🚀 Generate Perfect Documentary"):
                     asyncio.run(generate_audio(sentence, voice_model, audio_path))
                     audio_clip = AudioFileClip(audio_path)
                     
-                    # 2. Smart Visual Translator (Direct Method without paid API)
+                    # 2. Translation
                     translated_text = translate_to_english(sentence)
                     
-                    # हा प्रॉम्ट थेट इमेज AI ला सांगेल की उपमा (Metaphors) गाळून टाक
-                    final_image_prompt = f"{translated_text}. CRITICAL INSTRUCTION: Ignore all metaphors and similes (e.g., if it says 'like an airplane' or 'like a snake', DO NOT show any airplane or snake). Show ONLY the literal main natural subject. Highly realistic, true to life anatomy, zero hybrids, 32K resolution, National Geographic wildlife photography, natural lighting."
+                    # 3. THE ULTIMATE REALISM PROMPT (डोळे, नाक, त्वचा आणि 32K क्वालिटी)
+                    final_image_prompt = f"{translated_text}. ABSOLUTE REAL WORLD ACCURACY: 100% perfect facial identity. Hyper-realistic eyes, precise natural nose, realistic mouth, highly detailed natural hair, and true-to-life human/animal skin tone. 32k resolution, highest quality possible, cinematic masterpiece, photorealistic, National Geographic photography style, NO morphing, NO mutations, perfectly real world."
                     
                     st.caption(f"⚙️ Auto-Prompt: {final_image_prompt}")
                     
-                    # 3. Image Generation
+                    # 4. Image Generation
                     image_url = f"https://image.pollinations.ai/prompt/{urllib.parse.quote(final_image_prompt)}?width=1280&height=720&nologo=true"
                     img_data = requests.get(image_url).content
                     image_path = f"temp_frame_{i}.jpg"
                     with open(image_path, "wb") as f:
                         f.write(img_data)
                     
-                    # 4. Motion
+                    # 5. Motion
                     img_clip = ImageClip(image_path).set_duration(audio_clip.duration)
                     moving_clip = img_clip.resize(lambda t: 1 + 0.012 * t) 
                     w, h = img_clip.size
@@ -105,13 +105,13 @@ if st.button("🚀 Generate Perfect Documentary"):
                     final_scene = moving_clip.set_audio(audio_clip)
                     video_clips.append(final_scene)
                 
-                # 5. Final Assembly
-                st.info("🔄 जोडणी सुरू आहे...")
+                # 6. Final Assembly
+                st.info("🔄 ३२K व्हिडिओची जोडणी सुरू आहे...")
                 final_movie = concatenate_videoclips(video_clips, method="compose")
-                output_video = "Raman_Documentary_Master.mp4"
+                output_video = "Raman_32K_Ultra_Reality.mp4"
                 final_movie.write_videofile(output_video, fps=24, codec="libx264", audio_codec="aac", logger=None)
                 
-                st.success("✅ तुमचा स्वच्छ आणि परिपूर्ण व्हिडिओ तयार आहे!")
+                st.success("✅ तुमचा सर्वोच्च गुणवत्तेचा व्हिडिओ तयार आहे!")
                 st.video(output_video)
                 
                 final_movie.close()
