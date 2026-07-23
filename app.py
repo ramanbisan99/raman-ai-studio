@@ -11,7 +11,7 @@ import re
 from moviepy.editor import ImageClip, AudioFileClip, concatenate_videoclips
 
 # --- App Configuration ---
-st.set_page_config(page_title="RAMAN AI STUDIO - ULTIMATE PERFECTION", page_icon="🎬", layout="wide")
+st.set_page_config(page_title="RAMAN AI STUDIO - THE ABSOLUTE PINNACLE", page_icon="🎬", layout="wide")
 
 st.markdown("""
     <style>
@@ -23,8 +23,8 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.title("🎬 RAMAN AI STUDIO - ULTIMATE PERFECTION")
-st.markdown("<p style='text-align: center; color: #888888;'>Strict Isolation, 100% Indian Features & Full Body Geometry</p>", unsafe_allow_html=True)
+st.title("🎬 RAMAN AI STUDIO - ABSOLUTE FINAL CODE")
+st.markdown("<p style='text-align: center; color: #888888;'>या टूलची सर्वोच्च क्षमता: Strict Indian Ethnicity & Full Body Master</p>", unsafe_allow_html=True)
 st.markdown("---")
 
 # --- UI Setup ---
@@ -33,7 +33,7 @@ with col1:
     language = st.selectbox("१. स्क्रिप्टची भाषा:", ["Marathi", "Hindi", "English"])
     narrator_voice = st.selectbox("२. निवेदकाचा आवाज:", ["Male (पुरुष)", "Female (स्त्री)"])
 with col2:
-    script_text = st.text_area("३. परफेक्ट स्क्रिप्ट टाका (टीप: एका सीनमध्ये एकच ॲक्शन लिहा):", height=200)
+    script_text = st.text_area("३. स्क्रिप्ट टाका (टीप: गुंतागुंतीच्या ॲक्शन टाळा, सोपे सीन्स लिहा):", height=200)
 
 # --- Safe Translation Engine ---
 def translate_to_english(text):
@@ -62,7 +62,7 @@ if st.button("🚀 Generate Final Ultimate Video"):
     if not script_text.strip():
         st.warning("⚠️ कृपया स्क्रिप्ट टाका.")
     else:
-        with st.spinner("AI 32K क्वालिटी आणि अचूक Geometry प्रोसेस करत आहे..."):
+        with st.spinner("AI आपली पूर्ण ताकद लावून व्हिडिओ बनवत आहे..."):
             try:
                 sentences = [s.strip() for s in re.split(r'[.?!|।]+', script_text) if len(s.strip()) > 3]
                 
@@ -73,7 +73,7 @@ if st.button("🚀 Generate Final Ultimate Video"):
                 video_clips = []
                 
                 for i, sentence in enumerate(sentences):
-                    st.text(f"🎬 Scene {i+1} तयार होत आहे: '{sentence[:30]}...'")
+                    st.text(f"🎬 Scene {i+1} रेंडर होत आहे: '{sentence[:30]}...'")
                     
                     # 1. Audio
                     voice_model = get_voice_model(language, narrator_voice)
@@ -84,9 +84,9 @@ if st.button("🚀 Generate Final Ultimate Video"):
                     # 2. Translation
                     translated_text = translate_to_english(sentence)
                     
-                    # 3. THE ULTIMATE STRICT PROMPT
-                    # हा प्रॉम्ट स्पष्ट सांगतो: माणसे मिक्स करू नकोस, अस्सल भारतीय चेहरे दे आणि फुल बॉडी दाखव.
-                    final_image_prompt = f"Main Subject and Action: {translated_text}. ABSOLUTE RULES: 1. ETHNICITY: Any humans MUST be authentic rural Indian/South Asian with perfect natural dark hair, accurate skin tone, perfect eyes and nose. 2. GEOMETRY & PHYSICS: 100% flawless real-world anatomy, zero extra limbs, zero morphing or blending of subjects. Keep subjects clearly separated. 3. COMPOSITION: Cinematic wide shot, Full Body visible, accurate background. 32K resolution, National Geographic documentary masterpiece, photorealistic."
+                    # 3. THE ABSOLUTE MAXIMUM PROMPT
+                    # हा प्रॉम्ट या टूलची शेवटची ताकद आहे.
+                    final_image_prompt = f"Main Action: {translated_text}. MANDATORY RULES: 1. ALL humans must be strictly Authentic Indian (South Asian) with accurate Indian facial features, skin tone, and hair. 2. FULL BODY SHOT, wide cinematic angle, no extreme close-ups of faces. 3. 100% flawless real-world physics, perfect anatomical geometry, exact age representation. 4. Zero morphing, zero hallucination. 32K resolution, photorealistic, National Geographic style."
                     
                     st.caption(f"⚙️ Auto-Prompt: {final_image_prompt}")
                     
@@ -109,10 +109,10 @@ if st.button("🚀 Generate Final Ultimate Video"):
                 # 6. Final Assembly
                 st.info("🔄 व्हिडिओ जोडणी सुरू आहे...")
                 final_movie = concatenate_videoclips(video_clips, method="compose")
-                output_video = "Raman_Ultimate_Perfection.mp4"
+                output_video = "Raman_Final_Absolute.mp4"
                 final_movie.write_videofile(output_video, fps=24, codec="libx264", audio_codec="aac", logger=None)
                 
-                st.success("✅ तुमचा व्हिडिओ तयार आहे!")
+                st.success("✅ व्हिडिओ तयार आहे!")
                 st.video(output_video)
                 
                 final_movie.close()
