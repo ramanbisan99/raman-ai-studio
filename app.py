@@ -11,7 +11,7 @@ import re
 from moviepy.editor import ImageClip, AudioFileClip, concatenate_videoclips
 
 # --- App Configuration ---
-st.set_page_config(page_title="RAMAN AI STUDIO - CLEAN REALITY", page_icon="🎬", layout="wide")
+st.set_page_config(page_title="RAMAN AI STUDIO - THE FINAL MASTER", page_icon="🎬", layout="wide")
 
 st.markdown("""
     <style>
@@ -23,8 +23,8 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.title("🎬 RAMAN AI STUDIO - CLEAN REALITY")
-st.markdown("<p style='text-align: center; color: #888888;'>कोणतेही फालतू नियम नाहीत. जे लिहाल तेच दिसेल - 100% वास्तव!</p>", unsafe_allow_html=True)
+st.title("🎬 RAMAN AI STUDIO - FINAL MASTER")
+st.markdown("<p style='text-align: center; color: #888888;'>ऑटोमॅटिक भारतीय चेहरे, अचूक फुल बॉडी आणि 32K वास्तव!</p>", unsafe_allow_html=True)
 st.markdown("---")
 
 # --- UI Setup ---
@@ -33,15 +33,20 @@ with col1:
     language = st.selectbox("१. स्क्रिप्टची भाषा:", ["Marathi", "Hindi", "English"])
     narrator_voice = st.selectbox("२. निवेदकाचा आवाज:", ["Male (पुरुष)", "Female (स्त्री)"])
 with col2:
-    script_text = st.text_area("३. स्क्रिप्ट टाका (रोमन किंवा देवनागरी):", height=200, placeholder="उदा. मी शाळेत जात आहे...")
+    script_text = st.text_area("३. स्क्रिप्ट टाका (रोमन किंवा देवनागरी):", height=200, placeholder="उदा. Mi akashat unch udat ahe...")
 
-# --- Direct Translation Engine ---
-def translate_to_english(text):
+# --- ULTRA SMART LLM Translation Engine ---
+def smart_translate_and_format(text):
     try:
-        # गुगलचे डायरेक्ट इंजिन जे रोमन आणि देवनागरी दोन्ही बऱ्यापैकी समजते
-        url = f"https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=en&dt=t&q={urllib.parse.quote(text)}"
-        response = requests.get(url).json()
-        return response[0][0][0]
+        # हा प्रॉम्ट आपोआप 'Indian' शब्द जोडेल आणि उपमा (Metaphors) काढेल.
+        system_prompt = f"Translate the following Marathi or Romanized Marathi text to plain English. CRITICAL RULES: 1. If the text mentions a person (I, you, he, she, man, woman, boy, girl), explicitly add 'An authentic dark-skinned Indian [person/man/woman]'. 2. Remove ANY metaphors (like 'snake-like', 'airplane-like'). Just describe the literal action. Output ONLY the final visual English description. Text: {text}"
+        url = f"https://text.pollinations.ai/{urllib.parse.quote(system_prompt)}"
+        response = requests.get(url)
+        
+        if response.status_code == 200 and "error" not in response.text.lower():
+            return response.text.strip()
+        else:
+            return text
     except Exception as e:
         return text
 
@@ -59,11 +64,11 @@ async def generate_audio(text, voice, output_file):
     await communicate.save(output_file)
 
 # --- Video Generation Engine ---
-if st.button("🚀 Generate Perfect Video"):
+if st.button("🚀 Generate Perfect Automatic Video"):
     if not script_text.strip():
         st.warning("⚠️ कृपया स्क्रिप्ट टाका.")
     else:
-        with st.spinner("AI तुमची स्क्रिप्ट वाचून अचूक दृश्य बनवत आहे..."):
+        with st.spinner("AI तुमची स्क्रिप्ट वाचून ऑटोमॅटिक भारतीय चेहरे आणि 32K दृश्य बनवत आहे..."):
             try:
                 sentences = [s.strip() for s in re.split(r'[.?!|।]+', script_text) if len(s.strip()) > 3]
                 
@@ -81,11 +86,11 @@ if st.button("🚀 Generate Perfect Video"):
                     asyncio.run(generate_audio(sentence, voice_model, audio_path))
                     audio_clip = AudioFileClip(audio_path)
                     
-                    translated_text = translate_to_english(sentence)
+                    # Smart Translation & Context Formatting
+                    smart_text = smart_translate_and_format(sentence)
                     
-                    # 3. CLEAN PROMPT (No more confusing wildlife rules!)
-                    # फक्त क्वालिटी आणि फुल बॉडीचे नियम ठेवले आहेत.
-                    final_image_prompt = f"{translated_text}. Cinematic wide shot, Full body visible. 100% perfect real-world physics, accurate anatomy, natural geometry. Hyper-realistic skin, eyes, and hair. 32K resolution, highly detailed, photorealistic cinematic lighting."
+                    # FINAL GEOMETRY PROMPT
+                    final_image_prompt = f"Subject and Action: {smart_text}. MANDATORY RULES: Cinematic Wide Angle, Full Body visible. 100% flawless real-world physics and perfect anatomical geometry. Hyper-realistic skin, eyes, and natural environment. Zero mutations, no literal metaphors. 32K resolution, National Geographic documentary masterpiece style."
                     
                     st.caption(f"⚙️ Auto-Prompt: {final_image_prompt}")
                     
@@ -105,7 +110,7 @@ if st.button("🚀 Generate Perfect Video"):
                 
                 st.info("🔄 व्हिडिओ जोडणी सुरू आहे...")
                 final_movie = concatenate_videoclips(video_clips, method="compose")
-                output_video = "Raman_Clean_Reality.mp4"
+                output_video = "Raman_Final_Perfect_Code.mp4"
                 final_movie.write_videofile(output_video, fps=24, codec="libx264", audio_codec="aac", logger=None)
                 
                 st.success("✅ तुमचा व्हिडिओ तयार आहे!")
