@@ -11,7 +11,7 @@ import re
 from moviepy.editor import ImageClip, AudioFileClip, concatenate_videoclips
 
 # --- App Configuration ---
-st.set_page_config(page_title="RAMAN AI STUDIO - THE ABSOLUTE PINNACLE", page_icon="🎬", layout="wide")
+st.set_page_config(page_title="RAMAN AI STUDIO - FULL ACTION MASTER", page_icon="🎬", layout="wide")
 
 st.markdown("""
     <style>
@@ -23,8 +23,8 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.title("🎬 RAMAN AI STUDIO - ABSOLUTE FINAL CODE")
-st.markdown("<p style='text-align: center; color: #888888;'>या टूलची सर्वोच्च क्षमता: Strict Indian Ethnicity & Full Body Master</p>", unsafe_allow_html=True)
+st.title("🎬 RAMAN AI STUDIO - FINAL ACTION MASTER")
+st.markdown("<p style='text-align: center; color: #888888;'>Strict Wide-Angle, Full Body Indian Characters & Action</p>", unsafe_allow_html=True)
 st.markdown("---")
 
 # --- UI Setup ---
@@ -33,7 +33,7 @@ with col1:
     language = st.selectbox("१. स्क्रिप्टची भाषा:", ["Marathi", "Hindi", "English"])
     narrator_voice = st.selectbox("२. निवेदकाचा आवाज:", ["Male (पुरुष)", "Female (स्त्री)"])
 with col2:
-    script_text = st.text_area("३. स्क्रिप्ट टाका (टीप: गुंतागुंतीच्या ॲक्शन टाळा, सोपे सीन्स लिहा):", height=200)
+    script_text = st.text_area("३. स्क्रिप्ट टाका:", height=200, placeholder="उदा. एक माणूस शेतात काम करत आहे...")
 
 # --- Safe Translation Engine ---
 def translate_to_english(text):
@@ -62,7 +62,7 @@ if st.button("🚀 Generate Final Ultimate Video"):
     if not script_text.strip():
         st.warning("⚠️ कृपया स्क्रिप्ट टाका.")
     else:
-        with st.spinner("AI आपली पूर्ण ताकद लावून व्हिडिओ बनवत आहे..."):
+        with st.spinner("AI 32K क्वालिटी आणि Full Body Physics प्रोसेस करत आहे..."):
             try:
                 sentences = [s.strip() for s in re.split(r'[.?!|।]+', script_text) if len(s.strip()) > 3]
                 
@@ -75,29 +75,24 @@ if st.button("🚀 Generate Final Ultimate Video"):
                 for i, sentence in enumerate(sentences):
                     st.text(f"🎬 Scene {i+1} रेंडर होत आहे: '{sentence[:30]}...'")
                     
-                    # 1. Audio
                     voice_model = get_voice_model(language, narrator_voice)
                     audio_path = f"temp_audio_{i}.mp3"
                     asyncio.run(generate_audio(sentence, voice_model, audio_path))
                     audio_clip = AudioFileClip(audio_path)
                     
-                    # 2. Translation
                     translated_text = translate_to_english(sentence)
                     
-                    # 3. THE ABSOLUTE MAXIMUM PROMPT
-                    # हा प्रॉम्ट या टूलची शेवटची ताकद आहे.
-                    final_image_prompt = f"Main Action: {translated_text}. MANDATORY RULES: 1. ALL humans must be strictly Authentic Indian (South Asian) with accurate Indian facial features, skin tone, and hair. 2. FULL BODY SHOT, wide cinematic angle, no extreme close-ups of faces. 3. 100% flawless real-world physics, perfect anatomical geometry, exact age representation. 4. Zero morphing, zero hallucination. 32K resolution, photorealistic, National Geographic style."
+                    # THE ULTIMATE FULL-BODY PROMPT (Banning close-ups)
+                    final_image_prompt = f"WIDE ANGLE SHOT, LONG SHOT. FULL BODY COMPLETELY VISIBLE FROM HEAD TO TOE. Action: {translated_text}. STRICT RULES: Authentic rural Indian subjects, dark Indian hair, accurate skin tone. Zero extreme close-ups, no facial zooming. 100% real-world physics, perfect anatomical geometry, flawless environment integration. 32K resolution, highly detailed, photorealistic."
                     
                     st.caption(f"⚙️ Auto-Prompt: {final_image_prompt}")
                     
-                    # 4. Image Generation
                     image_url = f"https://image.pollinations.ai/prompt/{urllib.parse.quote(final_image_prompt)}?width=1280&height=720&nologo=true"
                     img_data = requests.get(image_url).content
                     image_path = f"temp_frame_{i}.jpg"
                     with open(image_path, "wb") as f:
                         f.write(img_data)
                     
-                    # 5. Motion
                     img_clip = ImageClip(image_path).set_duration(audio_clip.duration)
                     moving_clip = img_clip.resize(lambda t: 1 + 0.012 * t) 
                     w, h = img_clip.size
@@ -106,10 +101,9 @@ if st.button("🚀 Generate Final Ultimate Video"):
                     final_scene = moving_clip.set_audio(audio_clip)
                     video_clips.append(final_scene)
                 
-                # 6. Final Assembly
                 st.info("🔄 व्हिडिओ जोडणी सुरू आहे...")
                 final_movie = concatenate_videoclips(video_clips, method="compose")
-                output_video = "Raman_Final_Absolute.mp4"
+                output_video = "Raman_Final_FullBody.mp4"
                 final_movie.write_videofile(output_video, fps=24, codec="libx264", audio_codec="aac", logger=None)
                 
                 st.success("✅ व्हिडिओ तयार आहे!")
