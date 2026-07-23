@@ -33,26 +33,14 @@ with col1:
     language = st.selectbox("१. स्क्रिप्टची भाषा:", ["Marathi", "Hindi", "English"])
     narrator_voice = st.selectbox("२. निवेदकाचा आवाज:", ["Male (पुरुष)", "Female (स्त्री)"])
 with col2:
-    script_text = st.text_area("३. स्क्रिप्ट टाका (रोमन किंवा देवनागरी):", height=200, placeholder="उदा. Mi shalet jat ahe...")
+    script_text = st.text_area("३. स्क्रिप्ट टाका (देवनागरी किंवा इंग्रजीत टाका, उदा. 'मी शाळेत जात आहे' किंवा 'I am going to school'): ", height=200)
 
-# --- ULTRA SMART LLM Translation & Formatting Engine ---
-def smart_translate_and_format(text):
+# --- Direct Translation ---
+def translate_to_english(text):
     try:
-        # हा प्रॉम्ट आपोआप 'Indian', 'Wide Shot' आणि 'Full Body' सक्तीने जोडेल.
-        system_prompt = f"""Translate this Marathi/Roman Marathi text to literal English for an image prompt. 
-        CRITICAL RULES TO ENFORCE:
-        1. If humans are mentioned, explicitly state 'Authentic dark-haired rural Indian person/people with Indian facial features and brown skin'.
-        2. MANDATORY CAMERA ANGLE: Add 'Extreme wide shot taken from a far distance, full body completely visible from head to toe'.
-        3. Remove ANY metaphors (e.g., 'like a snake'). 
-        Output ONLY the final highly detailed English visual description. Text: {text}"""
-        
-        url = f"https://text.pollinations.ai/{urllib.parse.quote(system_prompt)}"
-        response = requests.get(url)
-        
-        if response.status_code == 200 and "error" not in response.text.lower():
-            return response.text.strip()
-        else:
-            return text
+        url = f"https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=en&dt=t&q={urllib.parse.quote(text)}"
+        response = requests.get(url).json()
+        return response[0][0][0]
     except Exception as e:
         return text
 
@@ -92,11 +80,10 @@ if st.button("🚀 Generate Perfect Automatic Video"):
                     asyncio.run(generate_audio(sentence, voice_model, audio_path))
                     audio_clip = AudioFileClip(audio_path)
                     
-                    # Smart Translation & Distance Formatting
-                    smart_text = smart_translate_and_format(sentence)
+                    translated_text = translate_to_english(sentence)
                     
-                    # FINAL GEOMETRY & PHYSICS PROMPT
-                    final_image_prompt = f"Subject and Action: {smart_text}. MANDATORY ENFORCEMENT: Absolutely NO extreme close-ups of faces. Camera must be far away. 100% flawless real-world physics, perfect anatomical geometry, exact scale and proportions. Hyper-realistic environment. Zero mutations, zero text, zero logos. 32K resolution, highly detailed, professional cinematic documentary masterpiece."
+                    # FINAL STRICT PROMPT (Hardcoded for Indian & Distance)
+                    final_image_prompt = f"Action: {translated_text}. STRICT RULES: 1. If any humans are present, they MUST be authentic rural Indian people with brown skin and dark hair. 2. EXTREME WIDE SHOT from a far distance. FULL BODY completely visible from head to toe. 3. Absolutely NO extreme close-ups of faces. 4. 100% flawless real-world physics, perfect anatomical geometry. 32K resolution, highly detailed cinematic documentary masterpiece."
                     
                     st.caption(f"⚙️ Auto-Prompt: {final_image_prompt}")
                     
