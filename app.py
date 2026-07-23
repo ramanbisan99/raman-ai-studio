@@ -11,7 +11,7 @@ import re
 from moviepy.editor import ImageClip, AudioFileClip, concatenate_videoclips
 
 # --- App Configuration ---
-st.set_page_config(page_title="RAMAN AI STUDIO - FULL BODY ACTION", page_icon="🎬", layout="wide")
+st.set_page_config(page_title="RAMAN AI STUDIO - THE CONTENT LAB PRO", page_icon="🎬", layout="wide")
 
 st.markdown("""
     <style>
@@ -23,8 +23,8 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.title("🎬 RAMAN AI STUDIO - FULL BODY ACTION")
-st.markdown("<p style='text-align: center; color: #888888;'>कोणतेही क्लोज-अप नाहीत! फक्त लांबून घेतलेले Full Body आणि Action शॉट्स.</p>", unsafe_allow_html=True)
+st.title("🎬 RAMAN AI STUDIO - PROFESSIONAL MASTER")
+st.markdown("<p style='text-align: center; color: #888888;'>Strict Wide-Angle, 100% Indian Characters, Full Body Distance Shots!</p>", unsafe_allow_html=True)
 st.markdown("---")
 
 # --- UI Setup ---
@@ -33,18 +33,26 @@ with col1:
     language = st.selectbox("१. स्क्रिप्टची भाषा:", ["Marathi", "Hindi", "English"])
     narrator_voice = st.selectbox("२. निवेदकाचा आवाज:", ["Male (पुरुष)", "Female (स्त्री)"])
 with col2:
-    script_text = st.text_area("३. स्क्रिप्ट टाका:", height=200, placeholder="उदा. काळे गिधाड झाडावर बसले आहे...")
+    script_text = st.text_area("३. स्क्रिप्ट टाका (रोमन किंवा देवनागरी):", height=200, placeholder="उदा. Mi shalet jat ahe...")
 
-# --- Safe Translation Engine (Removes Metaphors) ---
-def smart_translate(text):
+# --- ULTRA SMART LLM Translation & Formatting Engine ---
+def smart_translate_and_format(text):
     try:
-        url = f"https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=en&dt=t&q={urllib.parse.quote(text)}"
-        response = requests.get(url).json()
-        translated = response[0][0][0]
+        # हा प्रॉम्ट आपोआप 'Indian', 'Wide Shot' आणि 'Full Body' सक्तीने जोडेल.
+        system_prompt = f"""Translate this Marathi/Roman Marathi text to literal English for an image prompt. 
+        CRITICAL RULES TO ENFORCE:
+        1. If humans are mentioned, explicitly state 'Authentic dark-haired rural Indian person/people with Indian facial features and brown skin'.
+        2. MANDATORY CAMERA ANGLE: Add 'Extreme wide shot taken from a far distance, full body completely visible from head to toe'.
+        3. Remove ANY metaphors (e.g., 'like a snake'). 
+        Output ONLY the final highly detailed English visual description. Text: {text}"""
         
-        # सापासारखा (Snake-like) सारखे शब्द काढून टाकणे जेणेकरून चुका होणार नाहीत.
-        translated = translated.replace("snake-like", "").replace("like a snake", "")
-        return translated
+        url = f"https://text.pollinations.ai/{urllib.parse.quote(system_prompt)}"
+        response = requests.get(url)
+        
+        if response.status_code == 200 and "error" not in response.text.lower():
+            return response.text.strip()
+        else:
+            return text
     except Exception as e:
         return text
 
@@ -62,11 +70,11 @@ async def generate_audio(text, voice, output_file):
     await communicate.save(output_file)
 
 # --- Video Generation Engine ---
-if st.button("🚀 Generate Perfect Full Body Video"):
+if st.button("🚀 Generate Perfect Automatic Video"):
     if not script_text.strip():
         st.warning("⚠️ कृपया स्क्रिप्ट टाका.")
     else:
-        with st.spinner("AI लांबून (Long Shot) कॅमेरा सेट करत आहे आणि दृश्य बनवत आहे..."):
+        with st.spinner("AI तुमची स्क्रिप्ट वाचून लांबून घेतलेले भारतीय दृश्य बनवत आहे..."):
             try:
                 sentences = [s.strip() for s in re.split(r'[.?!|।]+', script_text) if len(s.strip()) > 3]
                 
@@ -79,29 +87,25 @@ if st.button("🚀 Generate Perfect Full Body Video"):
                 for i, sentence in enumerate(sentences):
                     st.text(f"🎬 Scene {i+1} रेंडर होत आहे: '{sentence[:30]}...'")
                     
-                    # 1. Audio
                     voice_model = get_voice_model(language, narrator_voice)
                     audio_path = f"temp_audio_{i}.mp3"
                     asyncio.run(generate_audio(sentence, voice_model, audio_path))
                     audio_clip = AudioFileClip(audio_path)
                     
-                    # 2. Translation
-                    translated_text = smart_translate(sentence)
+                    # Smart Translation & Distance Formatting
+                    smart_text = smart_translate_and_format(sentence)
                     
-                    # 3. STRICT CAMERA & FULL BODY PROMPT
-                    # या प्रॉम्टमुळे AI चेहऱ्याजवळ कॅमेरा नेऊ शकणार नाही.
-                    final_image_prompt = f"Subject and Action: {translated_text}. MANDATORY CAMERA RULES: Extreme wide shot, long shot taken from a distance. FULL BODY COMPLETELY VISIBLE from head to toe/tail. Show the entire subject in its surrounding environment. ABSOLUTELY NO CLOSE-UPS, NO PORTRAITS, NO MACRO SHOTS. 100% accurate true-to-life anatomy, natural habitat, real-world physics, photorealistic, 32k resolution, National Geographic documentary style."
+                    # FINAL GEOMETRY & PHYSICS PROMPT
+                    final_image_prompt = f"Subject and Action: {smart_text}. MANDATORY ENFORCEMENT: Absolutely NO extreme close-ups of faces. Camera must be far away. 100% flawless real-world physics, perfect anatomical geometry, exact scale and proportions. Hyper-realistic environment. Zero mutations, zero text, zero logos. 32K resolution, highly detailed, professional cinematic documentary masterpiece."
                     
                     st.caption(f"⚙️ Auto-Prompt: {final_image_prompt}")
                     
-                    # 4. Image Generation
                     image_url = f"https://image.pollinations.ai/prompt/{urllib.parse.quote(final_image_prompt)}?width=1280&height=720&nologo=true"
                     img_data = requests.get(image_url).content
                     image_path = f"temp_frame_{i}.jpg"
                     with open(image_path, "wb") as f:
                         f.write(img_data)
                     
-                    # 5. Motion (Subtle zoom)
                     img_clip = ImageClip(image_path).set_duration(audio_clip.duration)
                     moving_clip = img_clip.resize(lambda t: 1 + 0.012 * t) 
                     w, h = img_clip.size
@@ -110,10 +114,9 @@ if st.button("🚀 Generate Perfect Full Body Video"):
                     final_scene = moving_clip.set_audio(audio_clip)
                     video_clips.append(final_scene)
                 
-                # 6. Final Assembly
                 st.info("🔄 व्हिडिओ जोडणी सुरू आहे...")
                 final_movie = concatenate_videoclips(video_clips, method="compose")
-                output_video = "Raman_Full_Body_Reality.mp4"
+                output_video = "Raman_The_Content_Lab_Final.mp4"
                 final_movie.write_videofile(output_video, fps=24, codec="libx264", audio_codec="aac", logger=None)
                 
                 st.success("✅ तुमचा व्हिडिओ तयार आहे!")
