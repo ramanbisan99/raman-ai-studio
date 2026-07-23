@@ -11,7 +11,7 @@ import re
 from moviepy.editor import ImageClip, AudioFileClip, concatenate_videoclips
 
 # --- App Configuration ---
-st.set_page_config(page_title="RAMAN AI STUDIO - 100% AUTO PERFECT", page_icon="🎬", layout="wide")
+st.set_page_config(page_title="RAMAN AI STUDIO - 100% AUTO PROFESSIONAL", page_icon="🎬", layout="wide")
 
 st.markdown("""
     <style>
@@ -23,8 +23,8 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.title("🎬 RAMAN AI STUDIO - 100% AUTO PERFECT")
-st.markdown("<p style='text-align: center; color: #888888;'>Automatic Context Brain: स्वतःहून विषय ओळखणारा आणि 100% अचूक দৃশ্য बनवणारा AI!</p>", unsafe_allow_html=True)
+st.title("🎬 RAMAN AI STUDIO - 100% AUTO PROFESSIONAL")
+st.markdown("<p style='text-align: center; color: #888888;'>Metaphor Scrubber: 100% ऑटोमॅटिक विषय ओळखणारा आणि मानवी चुका टाळणारा AI!</p>", unsafe_allow_html=True)
 st.markdown("---")
 
 # --- UI Setup ---
@@ -35,23 +35,20 @@ with col1:
 with col2:
     script_text = st.text_area("३. संपूर्ण स्क्रिप्ट टाका (उदा. गरुडाला पक्ष्यांचा राजा मानले जाते...):", height=250)
 
-# --- 100% AUTOMATIC SUPER BRAIN ---
+# --- 100% AUTOMATIC SUPER BRAIN (THE METAPHOR SCRUBBER) ---
 def auto_perfect_prompt(full_script, current_sentence):
     try:
-        # हा AI मेंदू संपूर्ण कथा वाचून स्वतःच ठरवेल की प्राणी दाखवायचा की माणूस.
-        system_instruction = f"""You are an elite cinematic AI prompt engineer.
-        Read this ENTIRE STORY to understand the main theme: "{full_script}".
+        system_instruction = f"""You are an elite cinematic AI prompt engineer for wildlife and human documentaries.
+        Read the ENTIRE STORY for context: "{full_script}".
+        Now, rewrite ONLY this sentence into a flawless image generation prompt: "{current_sentence}".
         
-        Now, generate a flawless, highly detailed English image prompt ONLY for this current sentence: "{current_sentence}".
+        CRITICAL AND MANDATORY RULES:
+        1. METAPHOR SCRUBBING: If the story is about a bird/animal, and the text uses words like "King", "Queen", "Ruler", "He", "She", YOU MUST REMOVE THEM. Replace "King of birds" with "Apex predator bird". NEVER use the word "King" for an animal.
+        2. ANIMAL/NATURE CONTEXT: If the subject is wildlife (e.g., Eagle), append EXACTLY: "ONLY the animal in its natural habitat. ABSOLUTELY NO HUMANS, NO HUMAN KINGS, NO CLOTHING, NO CROWNS."
+        3. HUMAN CONTEXT: If the story is actually about humans, append: "Authentic rural dark-haired Indian person with brown skin."
+        4. CAMERA & QUALITY: Append to ALL prompts: "Extreme wide angle shot, taken from a far distance, FULL BODY completely visible, real-world physics, perfect anatomical geometry, 32K resolution, National Geographic photography style."
         
-        STRICT AUTOMATIC LOGIC TO APPLY:
-        1. THEME DETECTION: First, automatically decide if this story is primarily about a Nature/Animal subject OR a Human subject.
-        2. IF ANIMAL/NATURE: Automatically replace confusing words like 'King', 'He', 'She' with the animal's actual name. Explicitly append: "ONLY the animal in its natural environment. ABSOLUTELY NO HUMANS, NO HUMAN KINGS, NO PEOPLE in the image."
-        3. IF HUMAN: Explicitly append: "Authentic rural dark-haired Indian person with brown skin."
-        4. METAPHOR REMOVAL: Do not generate literal snakes if the text says "hisses like a snake". Translate it to just an angry expression.
-        5. CAMERA & DISTANCE: You MUST append this to EVERY prompt: "Extreme wide angle shot, taken from a far distance, FULL BODY completely visible, flawless real-world physics, perfect anatomical geometry, 32K resolution, highly detailed cinematic masterpiece."
-        
-        Output ONLY the final locked English prompt. Do not write any explanations.
+        Output ONLY the final locked English prompt. Do not add any conversational text.
         """
         
         url = f"https://text.pollinations.ai/{urllib.parse.quote(system_instruction)}"
@@ -82,7 +79,7 @@ if st.button("🚀 Generate 100% Auto Perfect Video"):
     if not script_text.strip():
         st.warning("⚠️ कृपया स्क्रिप्ट टाका.")
     else:
-        with st.spinner("AI चा ऑटोमॅटिक मेंदू स्क्रिप्टमधील प्रत्येक शब्दाचा अचूक अर्थ काढत आहे..."):
+        with st.spinner("AI चा ऑटोमॅटिक मेंदू स्क्रिप्टमधील उपमा (Metaphors) काढून 100% अचूक दृश्य बनवत आहे..."):
             try:
                 sentences = [s.strip() for s in re.split(r'[.?!|।]+', script_text) if len(s.strip()) > 5]
                 
@@ -101,7 +98,7 @@ if st.button("🚀 Generate 100% Auto Perfect Video"):
                     asyncio.run(generate_audio(sentence, voice_model, audio_path))
                     audio_clip = AudioFileClip(audio_path)
                     
-                    # 100% Auto Brain Logic
+                    # 100% Auto Brain Logic with Metaphor Scrubbing
                     perfect_prompt = auto_perfect_prompt(full_script_context, sentence)
                     st.caption(f"🧠 Auto-Brain Prompt: {perfect_prompt}")
                     
@@ -111,7 +108,7 @@ if st.button("🚀 Generate 100% Auto Perfect Video"):
                     with open(image_path, "wb") as f:
                         f.write(img_data)
                     
-                    # Smooth subtle zoom
+                    # Smooth professional zoom
                     img_clip = ImageClip(image_path).set_duration(audio_clip.duration)
                     moving_clip = img_clip.resize(lambda t: 1 + 0.010 * t) 
                     w, h = img_clip.size
@@ -122,7 +119,7 @@ if st.button("🚀 Generate 100% Auto Perfect Video"):
                 
                 st.info("🔄 व्हिडिओची व्यावसायिक जोडणी सुरू आहे...")
                 final_movie = concatenate_videoclips(video_clips, method="compose")
-                output_video = "Raman_100_Auto_Perfect.mp4"
+                output_video = "Raman_100_Auto_Professional.mp4"
                 final_movie.write_videofile(output_video, fps=24, codec="libx264", audio_codec="aac", logger=None)
                 
                 st.success("✅ तुमचा १००% ऑटोमॅटिक आणि अचूक व्हिडिओ तयार आहे!")
