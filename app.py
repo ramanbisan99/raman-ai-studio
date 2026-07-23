@@ -11,7 +11,7 @@ import re
 from moviepy.editor import ImageClip, AudioFileClip, concatenate_videoclips
 
 # --- App Configuration ---
-st.set_page_config(page_title="RAMAN AI STUDIO - THE CONTENT LAB PRO", page_icon="🎬", layout="wide")
+st.set_page_config(page_title="RAMAN AI STUDIO - PERFECT SEPARATION", page_icon="🎬", layout="wide")
 
 st.markdown("""
     <style>
@@ -24,7 +24,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 st.title("🎬 RAMAN AI STUDIO - PROFESSIONAL MASTER")
-st.markdown("<p style='text-align: center; color: #888888;'>Strict Wide-Angle, 100% Indian Characters, Full Body Distance Shots!</p>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; color: #888888;'>Smart Scanner: प्राण्यांना पंख, माणसांना नाही - 100% अचूकता!</p>", unsafe_allow_html=True)
 st.markdown("---")
 
 # --- UI Setup ---
@@ -33,7 +33,7 @@ with col1:
     language = st.selectbox("१. स्क्रिप्टची भाषा:", ["Marathi", "Hindi", "English"])
     narrator_voice = st.selectbox("२. निवेदकाचा आवाज:", ["Male (पुरुष)", "Female (स्त्री)"])
 with col2:
-    script_text = st.text_area("३. स्क्रिप्ट टाका (देवनागरी किंवा इंग्रजीत टाका, उदा. 'मी शाळेत जात आहे' किंवा 'I am going to school'): ", height=200)
+    script_text = st.text_area("३. स्क्रिप्ट टाका (टीप: 'तो/ती' ऐवजी प्राण्याचे नाव प्रत्येक वाक्यात लिहा): ", height=200)
 
 # --- Direct Translation ---
 def translate_to_english(text):
@@ -62,7 +62,7 @@ if st.button("🚀 Generate Perfect Automatic Video"):
     if not script_text.strip():
         st.warning("⚠️ कृपया स्क्रिप्ट टाका.")
     else:
-        with st.spinner("AI तुमची स्क्रिप्ट वाचून लांबून घेतलेले भारतीय दृश्य बनवत आहे..."):
+        with st.spinner("AI तुमची स्क्रिप्ट स्कॅन करून अचूक दृश्य बनवत आहे..."):
             try:
                 sentences = [s.strip() for s in re.split(r'[.?!|।]+', script_text) if len(s.strip()) > 3]
                 
@@ -80,10 +80,20 @@ if st.button("🚀 Generate Perfect Automatic Video"):
                     asyncio.run(generate_audio(sentence, voice_model, audio_path))
                     audio_clip = AudioFileClip(audio_path)
                     
-                    translated_text = translate_to_english(sentence)
+                    translated_text = translate_to_english(sentence).lower()
                     
-                    # FINAL STRICT PROMPT (Hardcoded for Indian & Distance)
-                    final_image_prompt = f"Action: {translated_text}. STRICT RULES: 1. If any humans are present, they MUST be authentic rural Indian people with brown skin and dark hair. 2. EXTREME WIDE SHOT from a far distance. FULL BODY completely visible from head to toe. 3. Absolutely NO extreme close-ups of faces. 4. 100% flawless real-world physics, perfect anatomical geometry. 32K resolution, highly detailed cinematic documentary masterpiece."
+                    # ---------------------------------------------------------
+                    # THE PYTHON KEYWORD SCANNER (Pronoun Fix)
+                    # ---------------------------------------------------------
+                    # Removed 'he', 'she', 'they', 'i am' to prevent false human triggers
+                    human_keywords = ['man', 'woman', 'boy', 'girl', 'person', 'people', 'farmer', 'kid', 'child', 'human']
+                    
+                    is_human_present = any(word in translated_text for word in human_keywords)
+                    
+                    if is_human_present:
+                        final_image_prompt = f"Action: {translated_text}. STRICT RULES: 1. Authentic rural Indian people with brown skin and dark hair. 2. EXTREME WIDE SHOT from a distance. FULL BODY completely visible. 3. Absolutely NO extreme close-ups. 4. 100% flawless real-world physics, perfect anatomical geometry. 32K resolution, highly detailed cinematic style."
+                    else:
+                        final_image_prompt = f"Action: {translated_text}. STRICT RULES: 1. ONLY show the main subject/animal/bird in its natural habitat. 2. ABSOLUTELY NO HUMANS, NO PEOPLE in the image. 3. WIDE SHOT. 4. 100% accurate true-to-life anatomy and real-world physics. 32K resolution, National Geographic documentary masterpiece."
                     
                     st.caption(f"⚙️ Auto-Prompt: {final_image_prompt}")
                     
@@ -103,7 +113,7 @@ if st.button("🚀 Generate Perfect Automatic Video"):
                 
                 st.info("🔄 व्हिडिओ जोडणी सुरू आहे...")
                 final_movie = concatenate_videoclips(video_clips, method="compose")
-                output_video = "Raman_The_Content_Lab_Final.mp4"
+                output_video = "Raman_Perfect_Separation_Final.mp4"
                 final_movie.write_videofile(output_video, fps=24, codec="libx264", audio_codec="aac", logger=None)
                 
                 st.success("✅ तुमचा व्हिडिओ तयार आहे!")
