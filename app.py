@@ -11,7 +11,7 @@ import re
 from moviepy.editor import ImageClip, AudioFileClip, concatenate_videoclips
 
 # --- App Configuration ---
-st.set_page_config(page_title="RAMAN AI STUDIO - PURE REALITY", page_icon="🎬", layout="wide")
+st.set_page_config(page_title="RAMAN AI STUDIO - DOCUMENTARY MASTER", page_icon="🎬", layout="wide")
 
 st.markdown("""
     <style>
@@ -23,8 +23,8 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.title("🎬 RAMAN AI STUDIO - PURE REALITY")
-st.markdown("<p style='text-align: center; color: #888888;'>कोणतेही मिक्सिंग नाही, फक्त अचूक आणि स्वच्छ दृश्ये!</p>", unsafe_allow_html=True)
+st.title("🎬 RAMAN AI STUDIO - DOCUMENTARY MASTER")
+st.markdown("<p style='text-align: center; color: #888888;'>उपमा (Metaphors) गाळून फक्त 100% नैसर्गिक दृश्ये देणारा मेंदू</p>", unsafe_allow_html=True)
 st.markdown("---")
 
 # --- UI Setup ---
@@ -33,16 +33,7 @@ with col1:
     language = st.selectbox("१. स्क्रिप्टची भाषा:", ["Marathi", "Hindi", "English"])
     narrator_voice = st.selectbox("२. निवेदकाचा आवाज:", ["Male (पुरुष)", "Female (स्त्री)"])
 with col2:
-    script_text = st.text_area("३. स्क्रिप्ट टाका:", height=200, placeholder="उदा. एक माणूस आकाशात उडत आहे...")
-
-# --- Safe Translation Engine ---
-def translate_to_english(text):
-    try:
-        url = f"https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=en&dt=t&q={urllib.parse.quote(text)}"
-        response = requests.get(url).json()
-        return response[0][0][0]
-    except Exception as e:
-        return text
+    script_text = st.text_area("३. स्क्रिप्ट टाका:", height=200, placeholder="उदा. तो सापासारखा फुत्कारतो...")
 
 # --- Voice Setup ---
 def get_voice_model(lang, voice_type):
@@ -58,11 +49,11 @@ async def generate_audio(text, voice, output_file):
     await communicate.save(output_file)
 
 # --- Video Generation Engine ---
-if st.button("🚀 Generate Pure Video"):
+if st.button("🚀 Generate Perfect Documentary"):
     if not script_text.strip():
         st.warning("⚠️ कृपया स्क्रिप्ट टाका.")
     else:
-        with st.spinner("AI तुमची स्क्रिप्ट प्रोसेस करत आहे..."):
+        with st.spinner("AI तुमची स्क्रिप्ट प्रोसेस करत आहे (Metaphors काढून टाकत आहे)..."):
             try:
                 sentences = [s.strip() for s in re.split(r'[.?!|।]+', script_text) if len(s.strip()) > 3]
                 
@@ -81,11 +72,19 @@ if st.button("🚀 Generate Pure Video"):
                     asyncio.run(generate_audio(sentence, voice_model, audio_path))
                     audio_clip = AudioFileClip(audio_path)
                     
-                    # 2. Pure Translation (No confusing rules added!)
-                    translated_text = translate_to_english(sentence)
+                    # 2. Smart Visual Translator (The Metaphor Filter)
+                    # हा प्रॉम्ट AI ला सांगतो की फक्त दृश्य दाखव, उपमा नकोत!
+                    system_prompt = """You are a master wildlife documentary storyboard artist. 
+                    Translate the user's text into an English image prompt. 
+                    CRITICAL RULES: 
+                    1. Remove ALL metaphors and similes (e.g., if it says 'hisses like a snake', DO NOT mention a snake. Just describe the main animal opening its beak or acting aggressively). 
+                    2. Never create monsters, hybrids, or human-animal mixtures. 
+                    3. Focus ONLY on literal, highly realistic visual details of the main subject. 
+                    4. Add: '32K resolution, National Geographic wildlife photography, highly detailed, photorealistic, natural lighting'.
+                    Output ONLY the generated English prompt."""
                     
-                    # Clean, strict prompt without mentioning other animals.
-                    final_image_prompt = f"{translated_text}. Strictly realistic, true to life colors, normal real-world anatomy, highly detailed, photorealistic, 32K resolution, National Geographic style."
+                    text_api_url = f"https://text.pollinations.ai/prompt/{urllib.parse.quote(sentence)}?system={urllib.parse.quote(system_prompt)}"
+                    final_image_prompt = requests.get(text_api_url).text.strip()
                     
                     st.caption(f"⚙️ Auto-Prompt: {final_image_prompt}")
                     
@@ -108,7 +107,7 @@ if st.button("🚀 Generate Pure Video"):
                 # 5. Final Assembly
                 st.info("🔄 जोडणी सुरू आहे...")
                 final_movie = concatenate_videoclips(video_clips, method="compose")
-                output_video = "Raman_Pure_Reality_Video.mp4"
+                output_video = "Raman_Documentary_Master.mp4"
                 final_movie.write_videofile(output_video, fps=24, codec="libx264", audio_codec="aac", logger=None)
                 
                 st.success("✅ तुमचा स्वच्छ आणि परिपूर्ण व्हिडिओ तयार आहे!")
