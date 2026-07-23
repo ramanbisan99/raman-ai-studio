@@ -11,7 +11,7 @@ import re
 from moviepy.editor import ImageClip, AudioFileClip, concatenate_videoclips
 
 # --- App Configuration ---
-st.set_page_config(page_title="RAMAN AI STUDIO - FULL BODY & ACTION PRO", page_icon="🎬", layout="wide")
+st.set_page_config(page_title="RAMAN AI STUDIO - PERFECT REALITY", page_icon="🎬", layout="wide")
 
 st.markdown("""
     <style>
@@ -23,8 +23,8 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.title("🎬 RAMAN AI STUDIO - ACTION MASTER")
-st.markdown("<p style='text-align: center; color: #888888;'>पूर्ण शरीर (Full Body), अचूक ॲक्शन आणि परफेक्ट बॅकग्राउंड!</p>", unsafe_allow_html=True)
+st.title("🎬 RAMAN AI STUDIO - PERFECT REALITY")
+st.markdown("<p style='text-align: center; color: #888888;'>Full Body, Real World Physics आणि 100% वास्तववादी!</p>", unsafe_allow_html=True)
 st.markdown("---")
 
 # --- UI Setup ---
@@ -33,10 +33,16 @@ with col1:
     language = st.selectbox("१. स्क्रिप्टची भाषा:", ["Marathi", "Hindi", "English"])
     narrator_voice = st.selectbox("२. निवेदकाचा आवाज:", ["Male (पुरुष)", "Female (स्त्री)"])
 with col2:
-    script_text = st.text_area("३. परफेक्ट स्क्रिप्ट टाका:", height=200, placeholder="उदा. दोन मित्र शाळेत जात आहेत...")
+    script_text = st.text_area("३. स्क्रिप्ट टाका:", height=200, placeholder="उदा. एक माणूस जंगलात उभा आहे...")
 
-# --- Safe Translation Engine ---
-def translate_to_english(text):
+# --- Metaphor Cleaner & Translator ---
+def clean_and_translate(text):
+    # 1. धोकादायक उपमा (Metaphors) डिलीट करणे (जेणेकरून साप/विमान येणार नाही)
+    bad_words = ["सापासारखा", "विमानासारखा", "वाघासारखा", "like a snake", "like an airplane", "like a tiger"]
+    for word in bad_words:
+        text = text.replace(word, "मोठ्याने") # Replace with a safe word
+    
+    # 2. Translate to English
     try:
         url = f"https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=en&dt=t&q={urllib.parse.quote(text)}"
         response = requests.get(url).json()
@@ -58,11 +64,11 @@ async def generate_audio(text, voice, output_file):
     await communicate.save(output_file)
 
 # --- Video Generation Engine ---
-if st.button("🚀 Generate Perfect Action Video"):
+if st.button("🚀 Generate Perfect Reality Video"):
     if not script_text.strip():
         st.warning("⚠️ कृपया स्क्रिप्ट टाका.")
     else:
-        with st.spinner("AI तुमची स्क्रिप्ट वाचून पूर्ण शरीर आणि ॲक्शन प्रोसेस करत आहे..."):
+        with st.spinner("AI 32K क्वालिटी आणि Full Body Physics प्रोसेस करत आहे..."):
             try:
                 sentences = [s.strip() for s in re.split(r'[.?!|।]+', script_text) if len(s.strip()) > 3]
                 
@@ -81,22 +87,22 @@ if st.button("🚀 Generate Perfect Action Video"):
                     asyncio.run(generate_audio(sentence, voice_model, audio_path))
                     audio_clip = AudioFileClip(audio_path)
                     
-                    # 2. Context & Full Body Translation
-                    translated_text = translate_to_english(sentence)
+                    # 2. Clean and Translate
+                    safe_english_text = clean_and_translate(sentence)
                     
-                    # THE NEW PERFECT PROMPT: Forces wide shots, full body, and exact context!
-                    final_image_prompt = f"Subject and Action: {translated_text}. CRITICAL RULES: Cinematic Wide Angle Shot, FULL BODY visible. Show the complete environment and background accurately based on the context. Do NOT generate extreme close-ups of faces. If the text is about a landscape (like a field), focus ONLY on the landscape without forcing human faces. Zero literal metaphors (no snake-skin, no mutations). 100% natural real-world physics, photorealistic, 32k resolution, National Geographic documentary style."
+                    # 3. ULTIMATE GEOMETRY & FULL BODY PROMPT
+                    final_image_prompt = f"Subject: {safe_english_text}. CRITICAL RULES: Wide-angle shot, FULL BODY visible. 100% accurate real-world physics and perfect anatomical geometry. Hyper-realistic skin tone, accurate eyes, nose, and hair, but captured in a full-body context. No mutations, no literal metaphors, no merging of animals. 32K resolution, National Geographic documentary photography, ultra-detailed, photorealistic."
                     
                     st.caption(f"⚙️ Auto-Prompt: {final_image_prompt}")
                     
-                    # 3. Image Generation
+                    # 4. Image Generation
                     image_url = f"https://image.pollinations.ai/prompt/{urllib.parse.quote(final_image_prompt)}?width=1280&height=720&nologo=true"
                     img_data = requests.get(image_url).content
                     image_path = f"temp_frame_{i}.jpg"
                     with open(image_path, "wb") as f:
                         f.write(img_data)
                     
-                    # 4. Motion
+                    # 5. Motion
                     img_clip = ImageClip(image_path).set_duration(audio_clip.duration)
                     moving_clip = img_clip.resize(lambda t: 1 + 0.012 * t) 
                     w, h = img_clip.size
@@ -105,13 +111,13 @@ if st.button("🚀 Generate Perfect Action Video"):
                     final_scene = moving_clip.set_audio(audio_clip)
                     video_clips.append(final_scene)
                 
-                # 5. Final Assembly
+                # 6. Final Assembly
                 st.info("🔄 जोडणी सुरू आहे...")
                 final_movie = concatenate_videoclips(video_clips, method="compose")
-                output_video = "Raman_Full_Body_Master.mp4"
+                output_video = "Raman_Perfect_Reality.mp4"
                 final_movie.write_videofile(output_video, fps=24, codec="libx264", audio_codec="aac", logger=None)
                 
-                st.success("✅ तुमचा परिपूर्ण व्हिडिओ तयार आहे!")
+                st.success("✅ तुमचा दर्जेदार व्हिडिओ तयार आहे!")
                 st.video(output_video)
                 
                 final_movie.close()
