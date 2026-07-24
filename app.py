@@ -8,13 +8,9 @@ import io
 from PIL import Image
 from moviepy.editor import ImageClip, AudioFileClip, concatenate_videoclips
 
-# --- SECURE API KEY SETUP ---
-try:
-    HF_API_KEY = st.secrets["HF_API_KEY"]
-except:
-    HF_API_KEY = ""
+# --- DIRECT HARDCODED SECURE API KEY ---
+HF_API_KEY = "Hf_QJvEhPalZezEWhvfXbHnMDnMxAVpzYgFjH"
 
-# नवीन आणि योग्य API URL
 API_URL = "https://router.huggingface.co/hf-inference/models/stabilityai/stable-diffusion-xl-base-1.0"
 HEADERS = {"Authorization": f"Bearer {HF_API_KEY}"}
 
@@ -32,7 +28,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 st.title("🎬 RAMAN AI STUDIO - PROFESSIONAL ENGINE")
-st.markdown("<p style='text-align: center; color: #888888;'>Powered by Hugging Face Supercomputers | Secure API Integrated</p>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; color: #888888;'>Powered by Hugging Face Supercomputers | Direct API Integrated</p>", unsafe_allow_html=True)
 st.markdown("---")
 
 # --- UI Setup ---
@@ -43,7 +39,7 @@ with col1:
     
     st.markdown("---")
     st.markdown("### 👤 Character / Style Lock")
-    st.info("Secure API Key Background मध्ये सक्रिय आहे.")
+    st.info("API Key थेट कोडमध्ये सक्रिय आहे.")
     character_seed = st.number_input("चेहरा/रचना लॉक करण्यासाठी सीड नंबर:", min_value=1, value=4242)
 
 with col2:
@@ -60,9 +56,6 @@ def translate_to_english(text):
 
 # --- Advanced Hugging Face Image Generation ---
 def generate_huggingface_image(prompt, seed):
-    if not HF_API_KEY:
-        raise Exception("API Key Missing! Please add it to Streamlit Secrets.")
-        
     payload = {
         "inputs": prompt,
         "parameters": {
