@@ -4,15 +4,7 @@ import edge_tts
 import urllib.parse
 import requests
 import re
-import io
-from PIL import Image
 from moviepy.editor import ImageClip, AudioFileClip, concatenate_videoclips
-
-# --- DIRECT HARDCODED SECURE API KEY ---
-HF_API_KEY = "Hf_QJvEhPalZezEWhvfXbHnMDnMxAVpzYgFjH"
-
-API_URL = "https://router.huggingface.co/hf-inference/models/stabilityai/stable-diffusion-xl-base-1.0"
-HEADERS = {"Authorization": f"Bearer {HF_API_KEY}"}
 
 # --- App Configuration ---
 st.set_page_config(page_title="RAMAN AI STUDIO", page_icon="🎬", layout="wide")
@@ -28,7 +20,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 st.title("🎬 RAMAN AI STUDIO - PROFESSIONAL ENGINE")
-st.markdown("<p style='text-align: center; color: #888888;'>Powered by Hugging Face Supercomputers | Direct API Integrated</p>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; color: #888888;'>Direct Keyless High-Performance Studio</p>", unsafe_allow_html=True)
 st.markdown("---")
 
 # --- UI Setup ---
@@ -39,7 +31,7 @@ with col1:
     
     st.markdown("---")
     st.markdown("### 👤 Character / Style Lock")
-    st.info("API Key थेट कोडमध्ये सक्रिय आहे.")
+    st.info("सिस्टीम पूर्णपणे फ्री आणि सक्रिय आहे.")
     character_seed = st.number_input("चेहरा/रचना लॉक करण्यासाठी सीड नंबर:", min_value=1, value=4242)
 
 with col2:
@@ -54,26 +46,9 @@ def translate_to_english(text):
     except Exception as e:
         return text
 
-# --- Advanced Hugging Face Image Generation ---
-def generate_huggingface_image(prompt, seed):
-    payload = {
-        "inputs": prompt,
-        "parameters": {
-            "negative_prompt": "mutated, extra fingers, deformed, bad anatomy, ugly, blurry, extra limbs, human (if wildlife)",
-            "seed": seed
-        }
-    }
-    response = requests.post(API_URL, headers=HEADERS, json=payload)
-    if response.status_code == 200:
-        return response.content
-    else:
-        raise Exception(f"API Error: {response.text}")
-
-# --- VEO Inspired Prompt Structuring ---
+# --- Prompt Builder ---
 def build_advanced_prompt(full_script, current_sentence):
     sent_eng = translate_to_english(current_sentence).lower()
-    full_eng = translate_to_english(full_script).lower()
-    
     wildlife_keywords = ['eagle', 'bird', 'animal', 'squirrel', 'tiger', 'lion', 'wild', 'forest']
     is_wildlife = any(word in sent_eng for word in wildlife_keywords)
     
@@ -94,7 +69,7 @@ if st.button("🚀 Generate Professional Video"):
     if not script_text.strip():
         st.warning("⚠️ कृपया स्क्रिप्ट टाका.")
     else:
-        with st.spinner("Hugging Face API शी संपर्क साधत आहे आणि व्हिडिओ रेंडर करत आहे..."):
+        with st.spinner("व्हिडिओ रेंडर होत आहे, कृपया थोडी वाट पाहा..."):
             try:
                 sentences = [s.strip() for s in re.split(r'[.?!|।]+', script_text) if len(s.strip()) > 5]
                 video_clips = []
@@ -110,10 +85,13 @@ if st.button("🚀 Generate Professional Video"):
                     
                     perfect_prompt = build_advanced_prompt(full_script_context, sentence)
                     
-                    img_bytes = generate_huggingface_image(perfect_prompt, character_seed)
+                    # Direct, fast and error-free image generation
+                    image_url = f"https://image.pollinations.ai/prompt/{urllib.parse.quote(perfect_prompt)}?width=1280&height=720&nologo=true&seed={character_seed}"
+                    
+                    img_data = requests.get(image_url).content
                     image_path = f"temp_frame_{i}.jpg"
                     with open(image_path, "wb") as f:
-                        f.write(img_bytes)
+                        f.write(img_data)
                     
                     img_clip = ImageClip(image_path).set_duration(audio_clip.duration)
                     moving_clip = img_clip.resize(lambda t: 1 + 0.010 * t) 
@@ -123,7 +101,7 @@ if st.button("🚀 Generate Professional Video"):
                     final_scene = moving_clip.set_audio(audio_clip)
                     video_clips.append(final_scene)
                 
-                st.info("🔄 फायनल रेंडर आणि व्हिडिओ जोडणी सुरू आहे...")
+                st.info("🔄 फायनल रेंडर सुरू आहे...")
                 final_movie = concatenate_videoclips(video_clips, method="compose")
                 output_video = "Raman_AI_Studio_Master.mp4"
                 final_movie.write_videofile(output_video, fps=24, codec="libx264", audio_codec="aac", logger=None)
