@@ -26,7 +26,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 st.title("🎬 RAMAN AI STUDIO - PROFESSIONAL ENGINE")
-st.markdown("<p style='text-align: center; color: #888888;'>Direct Keyless High-Performance Studio</p>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; color: #888888;'>Ultra-Realistic Anatomy & Cinematic Studio</p>", unsafe_allow_html=True)
 st.markdown("---")
 
 # --- UI Setup ---
@@ -37,7 +37,7 @@ with col1:
     
     st.markdown("---")
     st.markdown("### 👤 Character / Style Lock")
-    st.info("सिस्टीम पूर्णपणे फ्री आणि सक्रिय आहे.")
+    st.info("अनाटॉमी आणि अचूकतेसाठी सिस्टीम अपडेट केली आहे.")
     character_seed = st.number_input("चेहरा/रचना लॉक करण्यासाठी सीड नंबर:", min_value=1, value=4242)
 
 with col2:
@@ -52,16 +52,17 @@ def translate_to_english(text):
     except Exception as e:
         return text
 
-# --- Prompt Builder ---
+# --- Ultra-Realistic Prompt Builder (Fixed Anatomy) ---
 def build_advanced_prompt(full_script, current_sentence):
     sent_eng = translate_to_english(current_sentence).lower()
     wildlife_keywords = ['eagle', 'bird', 'animal', 'squirrel', 'tiger', 'lion', 'wild', 'forest']
     is_wildlife = any(word in sent_eng for word in wildlife_keywords)
     
     if is_wildlife:
-        final_prompt = f"National Geographic award winning wildlife photography, {sent_eng}. Strictly animal only, NO HUMANS. 100% biologically accurate anatomy, perfect feathers, sharp talons. Cinematic golden hour lighting, extreme wide shot, 8k resolution, masterpiece."
+        final_prompt = f"National Geographic award winning wildlife photography, {sent_eng}. Strictly animal only, NO HUMANS. 100% biologically accurate anatomy, correct number of limbs, perfect feathers, sharp talons. Cinematic golden hour lighting, extreme wide shot, 8k resolution, masterpiece."
     else:
-        final_prompt = f"Cinematic film still, {sent_eng}. Authentic rural Indian person. Flawless human anatomy, perfect hands, exactly 5 fingers. Dramatic natural lighting, medium wide shot, 8k resolution, highly detailed."
+        # humans / farmers / realistic Indian rural setting with strict hand and face constraints
+        final_prompt = f"Cinematic documentary film still, {sent_eng}. Authentic rural Indian person. Flawless human anatomy, perfect natural hands, exactly 5 fingers on each hand, realistic facial features, no distortion. Natural daylight, medium wide shot, 8k resolution, highly detailed, photorealistic."
         
     return final_prompt
 
@@ -91,7 +92,11 @@ if st.button("🚀 Generate Professional Video"):
                     
                     perfect_prompt = build_advanced_prompt(full_script_context, sentence)
                     
-                    image_url = f"https://image.pollinations.ai/prompt/{urllib.parse.quote(perfect_prompt)}?width=1280&height=720&nologo=true&seed={character_seed}"
+                    # Added negative constraints directly into url parameters to avoid deformed anatomy
+                    negative_filter = "deformed, mutated, extra fingers, ugly, blurry, bad anatomy"
+                    full_query = f"{perfect_prompt} --no {negative_filter}"
+                    
+                    image_url = f"https://image.pollinations.ai/prompt/{urllib.parse.quote(full_query)}?width=1280&height=720&nologo=true&seed={character_seed}"
                     
                     img_data = requests.get(image_url).content
                     image_path = f"temp_frame_{i}.jpg"
