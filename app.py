@@ -9,13 +9,13 @@ from PIL import Image
 from moviepy.editor import ImageClip, AudioFileClip, concatenate_videoclips
 
 # --- SECURE API KEY SETUP ---
-# आता तुझी Key इथे नाहीये. सिस्टीम ती Streamlit च्या लपलेल्या डब्यातून (Secrets) शोधेल.
 try:
     HF_API_KEY = st.secrets["HF_API_KEY"]
 except:
-    HF_API_KEY = "" # जर Key नसेल तर ॲप क्रॅश होऊ नये म्हणून
+    HF_API_KEY = ""
 
-API_URL = "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-xl-base-1.0"
+# नवीन आणि योग्य API URL
+API_URL = "https://router.huggingface.co/hf-inference/models/stabilityai/stable-diffusion-xl-base-1.0"
 HEADERS = {"Authorization": f"Bearer {HF_API_KEY}"}
 
 # --- App Configuration ---
