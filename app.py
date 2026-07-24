@@ -4,6 +4,12 @@ import edge_tts
 import urllib.parse
 import requests
 import re
+from PIL import Image
+
+# Fix for PIL ANTIALIAS error in newer versions
+if not hasattr(Image, 'ANTIALIAS'):
+    Image.ANTIALIAS = Image.LANCZOS
+
 from moviepy.editor import ImageClip, AudioFileClip, concatenate_videoclips
 
 # --- App Configuration ---
@@ -85,7 +91,6 @@ if st.button("🚀 Generate Professional Video"):
                     
                     perfect_prompt = build_advanced_prompt(full_script_context, sentence)
                     
-                    # Direct, fast and error-free image generation
                     image_url = f"https://image.pollinations.ai/prompt/{urllib.parse.quote(perfect_prompt)}?width=1280&height=720&nologo=true&seed={character_seed}"
                     
                     img_data = requests.get(image_url).content
