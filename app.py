@@ -1,17 +1,25 @@
-import PIL.Image
-if not hasattr(PIL.Image, 'ANTIALIAS'):
-    PIL.Image.ANTIALIAS = PIL.Image.LANCZOS
-
 import streamlit as st
 import asyncio
 import edge_tts
 import urllib.parse
 import requests
 import re
+import io
+from PIL import Image
 from moviepy.editor import ImageClip, AudioFileClip, concatenate_videoclips
 
+# --- SECURE API KEY SETUP ---
+# आता तुझी Key इथे नाहीये. सिस्टीम ती Streamlit च्या लपलेल्या डब्यातून (Secrets) शोधेल.
+try:
+    HF_API_KEY = st.secrets["HF_API_KEY"]
+except:
+    HF_API_KEY = "" # जर Key नसेल तर ॲप क्रॅश होऊ नये म्हणून
+
+API_URL = "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-xl-base-1.0"
+HEADERS = {"Authorization": f"Bearer {HF_API_KEY}"}
+
 # --- App Configuration ---
-st.set_page_config(page_title="RAMAN AI STUDIO - FINAL MASTER", page_icon="🎬", layout="wide")
+st.set_page_config(page_title="RAMAN AI STUDIO", page_icon="🎬", layout="wide")
 
 st.markdown("""
     <style>
@@ -19,12 +27,12 @@ st.markdown("""
     h1 { color: #E50914; font-weight: 900; text-align: center; font-family: 'Arial Black', sans-serif; }
     .stButton>button { background-color: #E50914; color: white; font-weight: bold; width: 100%; font-size: 20px; border-radius: 8px; border: none; padding: 14px;}
     .stButton>button:hover { background-color: #B20710; }
-    .stTextArea textarea, .stSelectbox select { background-color: #111111; color: #FFFFFF; border: 1px solid #333333; }
+    .stTextArea textarea, .stSelectbox select, .stNumberInput input { background-color: #111111; color: #FFFFFF; border: 1px solid #333333; }
     </style>
 """, unsafe_allow_html=True)
 
-st.title("🎬 RAMAN AI STUDIO - THE CONTENT LAB PRO")
-st.markdown("<p style='text-align: center; color: #888888;'>Strict Anatomy Enforcement | Perfect Hands & Talons</p>", unsafe_allow_html=True)
+st.title("🎬 RAMAN AI STUDIO - PROFESSIONAL ENGINE")
+st.markdown("<p style='text-align: center; color: #888888;'>Powered by Hugging Face Supercomputers | Secure API Integrated</p>", unsafe_allow_html=True)
 st.markdown("---")
 
 # --- UI Setup ---
@@ -32,8 +40,14 @@ col1, col2 = st.columns([1, 2])
 with col1:
     language = st.selectbox("१. स्क्रिप्टची भाषा:", ["Marathi", "Hindi", "English"])
     narrator_voice = st.selectbox("२. निवेदकाचा आवाज:", ["Male (पुरुष)", "Female (स्त्री)"])
+    
+    st.markdown("---")
+    st.markdown("### 👤 Character / Style Lock")
+    st.info("Secure API Key Background मध्ये सक्रिय आहे.")
+    character_seed = st.number_input("चेहरा/रचना लॉक करण्यासाठी सीड नंबर:", min_value=1, value=4242)
+
 with col2:
-    script_text = st.text_area("३. संपूर्ण स्क्रिप्ट टाका:", height=250, placeholder="उदा. एक गरुड आकाशात उंच उडत आहे...")
+    script_text = st.text_area("३. संपूर्ण स्क्रिप्ट टाका:", height=200, placeholder="उदा. एक भव्य गरुड आकाशात उडत आहे...")
 
 # --- Direct Translation Engine ---
 def translate_to_english(text):
@@ -44,75 +58,69 @@ def translate_to_english(text):
     except Exception as e:
         return text
 
-# --- 100% DETERMINISTIC PYTHON BRAIN (STRICT ANATOMY) ---
-def generate_perfect_prompt(full_script, current_sentence):
-    full_eng = translate_to_english(full_script).lower()
-    sent_eng = translate_to_english(current_sentence).lower()
-    
-    wildlife_keywords = ['eagle', 'bird', 'animal', 'tiger', 'lion', 'wild', 'forest', 'vulture', 'nature', 'snake']
-    human_keywords = ['man', 'woman', 'boy', 'girl', 'farmer', 'people', 'person', 'child', 'kid', 'he', 'she']
-    
-    is_wildlife = any(word in sent_eng for word in wildlife_keywords)
-    is_human = any(word in sent_eng for word in human_keywords)
-    
-    if not is_wildlife and not is_human:
-        is_wildlife = any(word in full_eng for word in wildlife_keywords)
-    
-    if is_wildlife and not is_human:
-        bad_words_pattern = re.compile(r'\b(king|queen|ruler|man|person|human)\b', re.IGNORECASE)
-        safe_sentence = bad_words_pattern.sub('the majestic animal', sent_eng)
-        final_prompt = f"Action: {safe_sentence}. STRICT RULES: ONLY show the animal/bird in its natural habitat. ABSOLUTELY NO HUMANS, NO PEOPLE. 100% ANATOMICALLY CORRECT, perfect feather structure, normal legs, sharp clear talons. NO extra limbs. Extreme wide shot, taken from a far distance, FULL BODY visible, 32K resolution, award-winning National Geographic wildlife photography."
+# --- Advanced Hugging Face Image Generation ---
+def generate_huggingface_image(prompt, seed):
+    if not HF_API_KEY:
+        raise Exception("API Key Missing! Please add it to Streamlit Secrets.")
+        
+    payload = {
+        "inputs": prompt,
+        "parameters": {
+            "negative_prompt": "mutated, extra fingers, deformed, bad anatomy, ugly, blurry, extra limbs, human (if wildlife)",
+            "seed": seed
+        }
+    }
+    response = requests.post(API_URL, headers=HEADERS, json=payload)
+    if response.status_code == 200:
+        return response.content
     else:
-        final_prompt = f"Action: {sent_eng}. STRICT RULES: Authentic rural dark-haired Indian person with brown skin. EXTREMELY IMPORTANT: 100% ANATOMICALLY CORRECT, PERFECT HANDS, PERFECT FIVE FINGERS, NO DEFORMITIES. Extreme wide angle shot, taken from a far distance, FULL BODY completely visible. Flawless real-world physics, 32K resolution, highly detailed cinematic style."
+        raise Exception(f"API Error: {response.text}")
+
+# --- VEO Inspired Prompt Structuring ---
+def build_advanced_prompt(full_script, current_sentence):
+    sent_eng = translate_to_english(current_sentence).lower()
+    full_eng = translate_to_english(full_script).lower()
+    
+    wildlife_keywords = ['eagle', 'bird', 'animal', 'squirrel', 'tiger', 'lion', 'wild', 'forest']
+    is_wildlife = any(word in sent_eng for word in wildlife_keywords)
+    
+    if is_wildlife:
+        final_prompt = f"National Geographic award winning wildlife photography, {sent_eng}. Strictly animal only, NO HUMANS. 100% biologically accurate anatomy, perfect feathers, sharp talons. Cinematic golden hour lighting, extreme wide shot, 8k resolution, masterpiece."
+    else:
+        final_prompt = f"Cinematic film still, {sent_eng}. Authentic rural Indian person. Flawless human anatomy, perfect hands, exactly 5 fingers. Dramatic natural lighting, medium wide shot, 8k resolution, highly detailed."
         
     return final_prompt
 
 # --- Voice Setup ---
-def get_voice_model(lang, voice_type):
-    if lang == "Marathi":
-        return "mr-IN-AarohiNeural" if voice_type == "Female (स्त्री)" else "mr-IN-ManoharNeural"
-    elif lang == "Hindi":
-        return "hi-IN-SwaraNeural" if voice_type == "Female (स्त्री)" else "hi-IN-MadhurNeural"
-    else:
-        return "en-US-AriaNeural" if voice_type == "Female (स्त्री)" else "en-US-ChristopherNeural"
-
 async def generate_audio(text, voice, output_file):
     communicate = edge_tts.Communicate(text, voice)
     await communicate.save(output_file)
 
 # --- Video Generation Engine ---
-if st.button("🚀 Generate Final Master Video"):
+if st.button("🚀 Generate Professional Video"):
     if not script_text.strip():
         st.warning("⚠️ कृपया स्क्रिप्ट टाका.")
     else:
-        with st.spinner("AI 100% अचूक ॲनाटॉमी तपासत आहे..."):
+        with st.spinner("Hugging Face API शी संपर्क साधत आहे आणि व्हिडिओ रेंडर करत आहे..."):
             try:
                 sentences = [s.strip() for s in re.split(r'[.?!|।]+', script_text) if len(s.strip()) > 5]
-                
-                if not sentences:
-                    st.error("स्क्रिप्ट योग्य नाही.")
-                    st.stop()
-                
                 video_clips = []
                 full_script_context = script_text.strip()
-                magic_seed = 4242 
                 
                 for i, sentence in enumerate(sentences):
                     st.text(f"🎬 Scene {i+1} रेंडर होत आहे: '{sentence[:30]}...'")
                     
-                    voice_model = get_voice_model(language, narrator_voice)
+                    voice_model = "mr-IN-ManoharNeural" if language == "Marathi" and "Male" in narrator_voice else "en-US-AriaNeural"
                     audio_path = f"temp_audio_{i}.mp3"
                     asyncio.run(generate_audio(sentence, voice_model, audio_path))
                     audio_clip = AudioFileClip(audio_path)
                     
-                    perfect_prompt = generate_perfect_prompt(full_script_context, sentence)
-                    st.caption(f"⚙️ Locked Prompt: {perfect_prompt}")
+                    perfect_prompt = build_advanced_prompt(full_script_context, sentence)
                     
-                    image_url = f"https://image.pollinations.ai/prompt/{urllib.parse.quote(perfect_prompt)}?width=1280&height=720&nologo=true&seed={magic_seed}"
-                    img_data = requests.get(image_url).content
+                    img_bytes = generate_huggingface_image(perfect_prompt, character_seed)
                     image_path = f"temp_frame_{i}.jpg"
                     with open(image_path, "wb") as f:
-                        f.write(img_data)
+                        f.write(img_bytes)
                     
                     img_clip = ImageClip(image_path).set_duration(audio_clip.duration)
                     moving_clip = img_clip.resize(lambda t: 1 + 0.010 * t) 
@@ -122,12 +130,12 @@ if st.button("🚀 Generate Final Master Video"):
                     final_scene = moving_clip.set_audio(audio_clip)
                     video_clips.append(final_scene)
                 
-                st.info("🔄 व्हिडिओची अंतिम जोडणी सुरू आहे...")
+                st.info("🔄 फायनल रेंडर आणि व्हिडिओ जोडणी सुरू आहे...")
                 final_movie = concatenate_videoclips(video_clips, method="compose")
-                output_video = "Raman_Final_Master.mp4"
+                output_video = "Raman_AI_Studio_Master.mp4"
                 final_movie.write_videofile(output_video, fps=24, codec="libx264", audio_codec="aac", logger=None)
                 
-                st.success("✅ तुमचा फायनल मास्टर व्हिडिओ तयार आहे!")
+                st.success("✅ तुमचा १००% प्रो आणि अचूक व्हिडिओ तयार आहे!")
                 st.video(output_video)
                 
                 final_movie.close()
@@ -135,4 +143,4 @@ if st.button("🚀 Generate Final Master Video"):
                     clip.close()
                 
             except Exception as e:
-                st.error(f"Error: {e}")
+                st.error(f"⚠️ तांत्रिक अडचण: {e}")
