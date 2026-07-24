@@ -11,7 +11,7 @@ import re
 from moviepy.editor import ImageClip, AudioFileClip, concatenate_videoclips
 
 # --- App Configuration ---
-st.set_page_config(page_title="RAMAN AI STUDIO - FINAL DRAFT BUILDER", page_icon="🎬", layout="wide")
+st.set_page_config(page_title="RAMAN AI STUDIO - FINAL MASTER", page_icon="🎬", layout="wide")
 
 st.markdown("""
     <style>
@@ -23,8 +23,8 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.title("🎬 RAMAN AI STUDIO - FINAL DRAFT BUILDER")
-st.markdown("<p style='text-align: center; color: #888888;'>Hardcoded Python Scanner: 100% ऑटोमॅटिक विषय ओळख (Drafting Tool)</p>", unsafe_allow_html=True)
+st.title("🎬 RAMAN AI STUDIO - THE CONTENT LAB PRO")
+st.markdown("<p style='text-align: center; color: #888888;'>Strict Anatomy Enforcement | Perfect Hands & Talons</p>", unsafe_allow_html=True)
 st.markdown("---")
 
 # --- UI Setup ---
@@ -44,21 +44,26 @@ def translate_to_english(text):
     except Exception as e:
         return text
 
-# --- 100% DETERMINISTIC PYTHON BRAIN (WITH ANATOMY FIX) ---
+# --- 100% DETERMINISTIC PYTHON BRAIN (STRICT ANATOMY) ---
 def generate_perfect_prompt(full_script, current_sentence):
     full_eng = translate_to_english(full_script).lower()
     sent_eng = translate_to_english(current_sentence).lower()
     
-    wildlife_keywords = ['eagle', 'bird', 'animal', 'tiger', 'lion', 'wild', 'forest', 'vulture', 'nature']
-    is_wildlife = any(word in full_eng for word in wildlife_keywords)
+    wildlife_keywords = ['eagle', 'bird', 'animal', 'tiger', 'lion', 'wild', 'forest', 'vulture', 'nature', 'snake']
+    human_keywords = ['man', 'woman', 'boy', 'girl', 'farmer', 'people', 'person', 'child', 'kid', 'he', 'she']
     
-    if is_wildlife:
-        bad_words_pattern = re.compile(r'\b(king|queen|ruler|he|she|his|her|man|person|human)\b', re.IGNORECASE)
-        safe_sentence = bad_words_pattern.sub('the majestic bird', sent_eng)
-        
-        final_prompt = f"Action: {safe_sentence}. STRICT RULES: ONLY show the animal/bird in its natural habitat. ABSOLUTELY NO HUMANS, NO PEOPLE. 100% ANATOMICALLY CORRECT, perfect feather structure, normal legs. Extreme wide shot, taken from a far distance, FULL BODY visible, 32K resolution, award-winning National Geographic wildlife photography."
+    is_wildlife = any(word in sent_eng for word in wildlife_keywords)
+    is_human = any(word in sent_eng for word in human_keywords)
+    
+    if not is_wildlife and not is_human:
+        is_wildlife = any(word in full_eng for word in wildlife_keywords)
+    
+    if is_wildlife and not is_human:
+        bad_words_pattern = re.compile(r'\b(king|queen|ruler|man|person|human)\b', re.IGNORECASE)
+        safe_sentence = bad_words_pattern.sub('the majestic animal', sent_eng)
+        final_prompt = f"Action: {safe_sentence}. STRICT RULES: ONLY show the animal/bird in its natural habitat. ABSOLUTELY NO HUMANS, NO PEOPLE. 100% ANATOMICALLY CORRECT, perfect feather structure, normal legs, sharp clear talons. NO extra limbs. Extreme wide shot, taken from a far distance, FULL BODY visible, 32K resolution, award-winning National Geographic wildlife photography."
     else:
-        final_prompt = f"Action: {sent_eng}. STRICT RULES: Authentic rural dark-haired Indian person with brown skin. Extreme wide angle shot, taken from a far distance, FULL BODY completely visible. Flawless real-world physics, perfect anatomical geometry, 32K resolution, highly detailed cinematic style."
+        final_prompt = f"Action: {sent_eng}. STRICT RULES: Authentic rural dark-haired Indian person with brown skin. EXTREMELY IMPORTANT: 100% ANATOMICALLY CORRECT, PERFECT HANDS, PERFECT FIVE FINGERS, NO DEFORMITIES. Extreme wide angle shot, taken from a far distance, FULL BODY completely visible. Flawless real-world physics, 32K resolution, highly detailed cinematic style."
         
     return final_prompt
 
@@ -76,11 +81,11 @@ async def generate_audio(text, voice, output_file):
     await communicate.save(output_file)
 
 # --- Video Generation Engine ---
-if st.button("🚀 Generate Perfect Draft Video"):
+if st.button("🚀 Generate Final Master Video"):
     if not script_text.strip():
         st.warning("⚠️ कृपया स्क्रिप्ट टाका.")
     else:
-        with st.spinner("AI 100% अचूक प्रॉम्ट बनवत आहे..."):
+        with st.spinner("AI 100% अचूक ॲनाटॉमी तपासत आहे..."):
             try:
                 sentences = [s.strip() for s in re.split(r'[.?!|।]+', script_text) if len(s.strip()) > 5]
                 
@@ -90,6 +95,7 @@ if st.button("🚀 Generate Perfect Draft Video"):
                 
                 video_clips = []
                 full_script_context = script_text.strip()
+                magic_seed = 4242 
                 
                 for i, sentence in enumerate(sentences):
                     st.text(f"🎬 Scene {i+1} रेंडर होत आहे: '{sentence[:30]}...'")
@@ -100,9 +106,9 @@ if st.button("🚀 Generate Perfect Draft Video"):
                     audio_clip = AudioFileClip(audio_path)
                     
                     perfect_prompt = generate_perfect_prompt(full_script_context, sentence)
-                    st.caption(f"⚙️ Locked Python Prompt: {perfect_prompt}")
+                    st.caption(f"⚙️ Locked Prompt: {perfect_prompt}")
                     
-                    image_url = f"https://image.pollinations.ai/prompt/{urllib.parse.quote(perfect_prompt)}?width=1280&height=720&nologo=true"
+                    image_url = f"https://image.pollinations.ai/prompt/{urllib.parse.quote(perfect_prompt)}?width=1280&height=720&nologo=true&seed={magic_seed}"
                     img_data = requests.get(image_url).content
                     image_path = f"temp_frame_{i}.jpg"
                     with open(image_path, "wb") as f:
@@ -116,12 +122,12 @@ if st.button("🚀 Generate Perfect Draft Video"):
                     final_scene = moving_clip.set_audio(audio_clip)
                     video_clips.append(final_scene)
                 
-                st.info("🔄 व्हिडिओची जोडणी सुरू आहे...")
+                st.info("🔄 व्हिडिओची अंतिम जोडणी सुरू आहे...")
                 final_movie = concatenate_videoclips(video_clips, method="compose")
-                output_video = "Raman_Final_Draft_Video.mp4"
+                output_video = "Raman_Final_Master.mp4"
                 final_movie.write_videofile(output_video, fps=24, codec="libx264", audio_codec="aac", logger=None)
                 
-                st.success("✅ तुमचा फायनल ड्राफ्ट व्हिडिओ तयार आहे!")
+                st.success("✅ तुमचा फायनल मास्टर व्हिडिओ तयार आहे!")
                 st.video(output_video)
                 
                 final_movie.close()
